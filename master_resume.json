@@ -1,0 +1,240 @@
+{
+    "identity": {
+      "name": "Jason W. Darrow",
+      "email": "Jason@JasonDarrow.com",
+      "location": "Milford, MA",
+      "website": "jasondarrow.com",
+      "linkedin": "linkedin.com/in/jasondarrow",
+      "github": "github.com/darrowj",
+      "title": "IT Delivery Manager | AI Project Builder"
+    },
+  
+    "summaries": [
+      {
+        "id": "delivery-mgr",
+        "target": "IT Delivery Manager / Program Manager",
+        "text": "Progressive IT Leader with 15+ years of experience managing cross-functional delivery teams and programs ranging from $250K to $3M. Proven track record of enhancing process efficiency, managing vendor and FTE resources both onshore and offshore, and serving as the face of IT for business stakeholders. PMP and CSM certified."
+      },
+      {
+        "id": "ai-transformation",
+        "target": "AI / Digital Transformation / Technology Leadership",
+        "text": "Technology leader with deep roots in software architecture, application development, and IT delivery — now building AI-powered systems to drive business outcomes. Combines 20 years of hands-on technical experience with 6 years of delivery leadership to bridge the gap between AI capability and business value."
+      },
+      {
+        "id": "technical-mgr",
+        "target": "Technical Manager / Engineering Manager",
+        "text": "IT leader with a developer foundation — architect, designer, and developer turned technical team manager. Experienced leading teams of business analysts, developers, and contractors through full SDLC. Managed 14-member teams, oversaw enterprise-scale applications, and delivered solutions supporting billions in managed assets."
+      }
+    ],
+  
+    "experience": [
+      {
+        "id": "exp001",
+        "company": "Voya Financial",
+        "title": "IT Delivery Manager",
+        "dates": "October 2018 – Present",
+        "bullets": [
+          {
+            "id": "b001",
+            "text": "Oversaw delivery and execution of business-prioritized IT programs ranging from $250K to $3M, managing 30+ application teams across onshore and offshore resources.",
+            "tags": ["delivery", "program-management", "budget", "offshore", "leadership"],
+            "strength": 9
+          },
+          {
+            "id": "b002",
+            "text": "Served as the face of IT for business stakeholders, coordinating communications across enterprise teams throughout all stages of the project lifecycle.",
+            "tags": ["stakeholder-management", "communication", "leadership", "business-alignment"],
+            "strength": 8
+          },
+          {
+            "id": "b003",
+            "text": "Coordinated development-to-maintenance knowledge transfer sessions across application teams, ensuring continuity and reducing delivery risk.",
+            "tags": ["knowledge-transfer", "risk-management", "delivery", "process"],
+            "strength": 7
+          },
+          {
+            "id": "b004",
+            "text": "Collected and consolidated development and QA effort estimates from across the enterprise at project concept stage to support planning and budgeting.",
+            "tags": ["estimation", "planning", "budget", "QA", "program-management"],
+            "strength": 7
+          },
+          {
+            "id": "b005",
+            "text": "Provided guidance and structure to blended project teams comprised of vendor and FTE resources, both onshore and offshore.",
+            "tags": ["vendor-management", "offshore", "team-leadership", "delivery"],
+            "strength": 8
+          }
+        ]
+      },
+      {
+        "id": "exp002",
+        "company": "Bank of America",
+        "title": "Service Delivery Consultant / Tech Team Manager",
+        "dates": "February 2012 – October 2018",
+        "bullets": [
+          {
+            "id": "b006",
+            "text": "Managed a 14-member team of business analysts and developers, responsible for hiring decisions that directly influenced team synergy and performance.",
+            "tags": ["people-management", "hiring", "team-building", "leadership"],
+            "strength": 9
+          },
+          {
+            "id": "b007",
+            "text": "Served as Application Manager for the Client and Account Closure Orchestration portal, supporting 8 lines of business and 5 regulatory groups.",
+            "tags": ["application-management", "regulatory", "enterprise", "multi-LOB"],
+            "strength": 9
+          },
+          {
+            "id": "b008",
+            "text": "Facilitated annual planning sessions with business partners and coordinated cross-team delivery for projects ranging from $250K to $1.5M.",
+            "tags": ["planning", "budget", "delivery", "business-alignment", "program-management"],
+            "strength": 8
+          },
+          {
+            "id": "b009",
+            "text": "Successfully supported Data Management applications for regulatory compliance, coordinating across enterprise infrastructure, architecture, and support teams.",
+            "tags": ["data-management", "regulatory-compliance", "enterprise-architecture", "infrastructure"],
+            "strength": 8
+          },
+          {
+            "id": "b010",
+            "text": "Managed teams using Agile-based project methods, facilitating requirements sessions with business partners and test planning sessions with QA teams.",
+            "tags": ["agile", "scrum", "QA", "requirements", "business-analysis"],
+            "strength": 7
+          }
+        ]
+      },
+      {
+        "id": "exp003",
+        "company": "Bank of America",
+        "title": "Technical Project Team Manager",
+        "dates": "August 2008 – February 2012",
+        "bullets": [
+          {
+            "id": "b011",
+            "text": "Led technical teams through all phases of the SDLC, managing contractors, consultants, and FTEs located in the US and internationally.",
+            "tags": ["SDLC", "international", "contractors", "technical-leadership"],
+            "strength": 8
+          },
+          {
+            "id": "b012",
+            "text": "Implemented a document management solution using the Google Search Appliance as part of the Client Onboarding program.",
+            "tags": ["document-management", "onboarding", "implementation", "technical"],
+            "strength": 7
+          },
+          {
+            "id": "b013",
+            "text": "Delivered multiple KYC (Know Your Customer) portal projects, creating front-end solutions for business partner use.",
+            "tags": ["KYC", "compliance", "front-end", "portal", "delivery"],
+            "strength": 7
+          }
+        ]
+      },
+      {
+        "id": "exp004",
+        "company": "Bank of America",
+        "title": "Web Application Architect",
+        "dates": "February 2001 – August 2008",
+        "bullets": [
+          {
+            "id": "b014",
+            "text": "Architected, designed, and developed an aircraft residual calculator for the Corporate Aircraft Finance Group of Bank of America Leasing, responsible for $1.2B in business.",
+            "tags": ["architecture", "development", "java", "finance", "high-impact"],
+            "strength": 10
+          },
+          {
+            "id": "b015",
+            "text": "Served as Technical Team Leader for bankofamericaleasing.com, the corporate site for a leasing company responsible for $32B in managed assets.",
+            "tags": ["technical-leadership", "web", "enterprise", "high-impact"],
+            "strength": 10
+          },
+          {
+            "id": "b016",
+            "text": "Selected by CIO to fill the role of Leasing Domain Architect, recognizing technical leadership and architectural expertise.",
+            "tags": ["architecture", "recognition", "leadership", "CIO"],
+            "strength": 9
+          },
+          {
+            "id": "b017",
+            "text": "Implemented Java-based solution to pull data from a Data Warehouse, convert to XML, and batch process with a third-party financial calculator to deliver daily portfolio profitability snapshots.",
+            "tags": ["java", "data-warehouse", "XML", "batch-processing", "finance", "development"],
+            "strength": 9
+          },
+          {
+            "id": "b018",
+            "text": "Led Computer Information Security assessments for all Leasing LOB applications, coordinating a team across 17 assessments and 5 project managers.",
+            "tags": ["security", "compliance", "assessment", "team-leadership"],
+            "strength": 8
+          }
+        ]
+      },
+      {
+        "id": "exp005",
+        "company": "Click2Learn.com",
+        "title": "Senior Developer",
+        "dates": "February 2000 – January 2001",
+        "bullets": [
+          {
+            "id": "b019",
+            "text": "Delivered eLearning software development projects for Fortune 1000 companies including Microsoft, Prudential, Fidelity, and Princeton Review.",
+            "tags": ["development", "eLearning", "Fortune1000", "java", "javascript"],
+            "strength": 7
+          }
+        ]
+      }
+    ],
+  
+    "skills": {
+      "delivery": ["IT Delivery Management", "Program Management", "Project Management", "SDLC", "Risk Management", "Stakeholder Management", "Vendor Management", "Offshore Team Management", "Budget Management"],
+      "methodology": ["Agile", "Scrum", "Waterfall", "SDLC", "PMP"],
+      "technical": ["Java", "Spring Framework", "Hibernate", "AJAX", "XML", "SQL", "Python", "JavaScript", "HTML", "CSS", "ASP"],
+      "ai_tools": ["Claude API", "Prompt Engineering", "LLM Workflows", "AI Agents"],
+      "platforms": ["AWS", "GitHub", "Git"],
+      "domain": ["Financial Services", "Regulatory Compliance", "Data Management", "Application Management", "eLearning"]
+    },
+  
+    "projects": [
+      {
+        "id": "proj001",
+        "name": "AI Job Search System",
+        "url": "jasondarrow.com",
+        "github": "github.com/darrowj/ai-job-search",
+        "description": "Built an AI-powered job search agent that scrapes job boards, filters by criteria, tailors resumes and cover letters using the Claude API, and tracks application progress through a full pipeline.",
+        "tags": ["python", "llm", "claude-api", "automation", "ai", "agents"],
+        "status": "In Progress - Wave 0"
+      }
+    ],
+  
+    "education": [
+      {
+        "degree": "Master of Science, Information Systems (Distinction)",
+        "school": "Bentley College"
+      },
+      {
+        "degree": "Bachelor of Science, Management of Information Systems (Magna Cum Laude)",
+        "school": "Northeastern University"
+      }
+    ],
+  
+    "certifications": [
+      {
+        "name": "Project Management Professional (PMP)",
+        "valid": "October 2018 – October 2026"
+      },
+      {
+        "name": "Certified ScrumMaster (CSM)",
+        "valid": "January 2018 – January 2026"
+      },
+      {
+        "name": "Retirement Income Certified Professional (RICP)",
+        "valid": "April 2022 – December 2025"
+      }
+    ],
+  
+    "metadata": {
+      "last_updated": "2026-05-10",
+      "version": 1,
+      "source_resume": "Jason_Darrow_Resume_v11.docx",
+      "target_roles": ["IT Delivery Manager", "Program Manager", "Technical Program Manager", "AI Operations Manager", "Digital Transformation Lead"]
+    }
+  }
