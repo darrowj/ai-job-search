@@ -66,14 +66,20 @@ Return your response in this exact JSON format:
 
     return result
 
-# Test with City National Bank job
+# Job details
 job_title = "Manager, IT Delivery Team"
 job_description = """
 This position is responsible for leading the successful delivery of 
-Strategic programs across Technology and Innovation. The role leads 
-remediation efforts of various projects focused on delivering execution 
-in a matrixed environment. Engages with all levels of staff and management 
-in technology and business units. 
+Strategic programs across Technology and Innovation. This position will 
+lead the remediation efforts of various projects focused on delivering 
+execution in a matrixed environment. The person in this role engages with 
+all levels of staff and management in the technology and business units. 
+This role operates in a fast-paced environment with teams of motivated 
+colleagues to deliver high quality solutions that add value to colleague 
+and client experiences. Successful incumbent will be capable of working 
+in a rapidly changing industry/environment, can tolerate ambiguity, 
+demonstrate problem-solving leadership and act as a change agent at both 
+the organizational level and via solutions delivery.
 
 Required: 10 years IT experience, 10 years Program/Project Management, 
 7 years Financial Services, 5 years process improvement, 6 years 
@@ -81,16 +87,12 @@ supervisory experience. PMP or CSM preferred. Agile, waterfall, iterative
 delivery experience. Vendor management. Stakeholder management.
 """
 
+# Run the tailoring
 result = tailor_resume(job_title, job_description)
 
-print("\n=== TAILORED RESUME ===\n")
-print("SUMMARY:")
-print(result["tailored_summary"])
-print("\nMATCH SCORE:", result["match_score"], "/ 100")
-print("\nKEY SKILLS:")
-for skill in result["key_skills"]:
-    print(f"  • {skill}")
-print("\nSELECTED BULLETS:")
-for bullet in result["selected_bullets"]:
-    print(f"\n  [{bullet['company']} — {bullet['title']}]")
-    print(f"  {bullet['bullet']}")
+# Save output for resume generator
+with open("tailored_output.json", "w") as f:
+    json.dump(result, f, indent=2)
+
+print("Tailoring complete. Match score:", result["match_score"])
+print("Saved to tailored_output.json")
