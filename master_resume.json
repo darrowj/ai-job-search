@@ -1,6 +1,7 @@
 {
     "identity": {
       "name": "Jason W. Darrow",
+      "phone": "774-573-8354",
       "email": "Jason@JasonDarrow.com",
       "location": "Milford, MA",
       "website": "jasondarrow.com",
@@ -8,12 +9,11 @@
       "github": "github.com/darrowj",
       "title": "IT Delivery Manager | AI Project Builder"
     },
-  
     "summaries": [
       {
         "id": "delivery-mgr",
         "target": "IT Delivery Manager / Program Manager",
-        "text": "Progressive IT Leader with 15+ years of experience managing cross-functional delivery teams and programs ranging from $250K to $3M. Proven track record of enhancing process efficiency, managing vendor and FTE resources both onshore and offshore, and serving as the face of IT for business stakeholders. PMP and CSM certified."
+        "text": "Progressive IT Delivery Leader with 15+ years of experience managing strategic programs and cross-functional teams in complex, matrixed environments. Proven track record of driving execution across Technology and Business units, managing vendor and FTE resources both onshore and offshore, and serving as the face of IT for senior stakeholders. Deep financial services background spanning 17+ years, with hands-on experience across Agile, Waterfall, and iterative delivery methodologies. PMP and CSM certified with a consistent record of process improvement and on-time program delivery."
       },
       {
         "id": "ai-transformation",
@@ -26,44 +26,42 @@
         "text": "IT leader with a developer foundation — architect, designer, and developer turned technical team manager. Experienced leading teams of business analysts, developers, and contractors through full SDLC. Managed 14-member teams, oversaw enterprise-scale applications, and delivered solutions supporting billions in managed assets."
       }
     ],
-  
+    "key_contributions": [
+      "IT Lead for a business project overseeing 30 application teams with a $2M+ budget",
+      "Diligently manage and oversee budgets and planning on projects from $250K to $3M.",
+      "Architect, Designer and Developer for a project to create an aircraft residual calculator for the Corporate Aircraft Finance Group of Bank of America Leasing responsible for $1.2B in business.",
+      "Technical Team Leader for the corporate site www.bankofamericaleasing.com, $32B in managed assets."
+    ],
     "experience": [
       {
         "id": "exp001",
         "company": "Voya Financial",
         "title": "IT Delivery Manager",
         "dates": "October 2018 – Present",
+        "role_description": "Oversees delivery and execution of business prioritized IT programs and projects. Responsible for providing guidance and structure to project teams comprised of vendor and FTE resources, both onshore and offshore.",
         "bullets": [
-          {
-            "id": "b001",
-            "text": "Oversaw delivery and execution of business-prioritized IT programs ranging from $250K to $3M, managing 30+ application teams across onshore and offshore resources.",
-            "tags": ["delivery", "program-management", "budget", "offshore", "leadership"],
-            "strength": 9
-          },
-          {
-            "id": "b002",
-            "text": "Served as the face of IT for business stakeholders, coordinating communications across enterprise teams throughout all stages of the project lifecycle.",
-            "tags": ["stakeholder-management", "communication", "leadership", "business-alignment"],
-            "strength": 8
-          },
-          {
-            "id": "b003",
-            "text": "Coordinated development-to-maintenance knowledge transfer sessions across application teams, ensuring continuity and reducing delivery risk.",
-            "tags": ["knowledge-transfer", "risk-management", "delivery", "process"],
-            "strength": 7
-          },
-          {
-            "id": "b004",
-            "text": "Collected and consolidated development and QA effort estimates from across the enterprise at project concept stage to support planning and budgeting.",
-            "tags": ["estimation", "planning", "budget", "QA", "program-management"],
-            "strength": 7
-          },
-          {
-            "id": "b005",
-            "text": "Provided guidance and structure to blended project teams comprised of vendor and FTE resources, both onshore and offshore.",
-            "tags": ["vendor-management", "offshore", "team-leadership", "delivery"],
-            "strength": 8
-          }
+          { "id": "b001", "text": "IT Delivery Manager responsible for the Managed Accounts program — worked with MorningStar and Future Capital to provide investment advice to plan participants.", "tags": ["vendor-management", "retirement", "financial-services", "program-management"], "strength": 8 },
+          { "id": "b002", "text": "Managed projects working directly with vendors to provide web functionality to retirement advisors and plan participants.", "tags": ["vendor-management", "web", "retirement", "delivery"], "strength": 7 },
+          { "id": "b003", "text": "Responsible for presenting projects to the IT Project Intake team for approval, including scope, impact, and budget justification.", "tags": ["governance", "budget", "program-management", "stakeholder-management"], "strength": 7 },
+          { "id": "b004", "text": "Coordinated with vendors and third-parties for timelines, development, testing, change deployment, and other project related activities.", "tags": ["vendor-management", "coordination", "delivery", "change-management"], "strength": 8 },
+          { "id": "b005", "text": "Facilitated weekly IT Status meetings for all application teams, QA, and business partners associated with active projects.", "tags": ["stakeholder-management", "communication", "agile", "leadership"], "strength": 7 },
+          { "id": "b006", "text": "Worked as IT Leader responsible for bringing Scope changes through the enterprise Change Control process.", "tags": ["change-management", "governance", "enterprise", "delivery"], "strength": 8 },
+          { "id": "b007", "text": "Represented projects through the Enterprise Change Management process ensuring compliance and alignment with organizational standards.", "tags": ["change-management", "compliance", "enterprise", "governance"], "strength": 7 },
+          { "id": "b008", "text": "Worked with the Release Management team to ensure all application teams were in alignment and ready for production deployment.", "tags": ["release-management", "devops", "delivery", "coordination"], "strength": 8 },
+          { "id": "b009", "text": "Managed project proposals from concept through application impacts, estimates, project approval, and full enterprise lifecycle to production delivery.", "tags": ["program-management", "planning", "delivery", "governance"], "strength": 9 },
+          { "id": "b010", "text": "Led successful delivery of strategic IT programs ranging from $250K to $3M in a matrixed environment, coordinating 30+ application teams across onshore and offshore resources.", "tags": ["delivery", "budget", "offshore", "matrixed", "leadership"], "strength": 10 },
+          { "id": "b011", "text": "Served as the face of IT for business stakeholders at all levels, driving communications and alignment across enterprise technology and business units throughout all stages of the project lifecycle.", "tags": ["stakeholder-management", "communication", "leadership", "business-alignment"], "strength": 9 },
+          { "id": "b012", "text": "Provided structure and leadership to blended project teams comprised of vendor and FTE resources both onshore and offshore, ensuring accountability and high-quality solution delivery.", "tags": ["vendor-management", "offshore", "team-leadership", "delivery"], "strength": 9 },
+          { "id": "b013", "text": "Responsible for Application Development to Application Maintenance Knowledge Transfer sessions ensuring continuity and reducing delivery risk.", "tags": ["knowledge-transfer", "risk-management", "delivery", "process"], "strength": 7 },
+          { "id": "b014", "text": "Worked with the Project Management Office to finalize and present budgets to business leaders for project approval.", "tags": ["budget", "PMO", "stakeholder-management", "planning"], "strength": 8 },
+          { "id": "b015", "text": "Managed project teams with both onshore and offshore developers, QA testers, and project managers across multiple concurrent initiatives.", "tags": ["offshore", "team-leadership", "QA", "program-management"], "strength": 8 },
+          { "id": "b016", "text": "Worked as a business analyst on projects to help cover requirements gathering and documentation needs.", "tags": ["business-analysis", "requirements", "agile", "delivery"], "strength": 6 },
+          { "id": "b017", "text": "Worked as a QA Lead on projects to facilitate and oversee the work of QA Testers ensuring quality delivery.", "tags": ["QA", "testing", "leadership", "delivery"], "strength": 6 },
+          { "id": "b018", "text": "Entered resource hour estimates in Clarity and PlanView time tracking systems, working with Project Managers to resolve variances between estimates and actuals.", "tags": ["resource-management", "planning", "PMO", "tools"], "strength": 6 },
+          { "id": "b019", "text": "Used ServiceNow for CMDB application setup and maintenance, creating tickets for application teams to support data requests.", "tags": ["ServiceNow", "CMDB", "ITSM", "tools"], "strength": 7 },
+          { "id": "b020", "text": "Provided team leadership to proactively address and resolve conflicts between different teams involved in projects, including Business and IT application teams.", "tags": ["conflict-resolution", "leadership", "stakeholder-management", "team-building"], "strength": 8 },
+          { "id": "b021", "text": "Facilitated discussions for Day 1 versus Day 2 deliverable scoping when projects encountered time delivery concerns, balancing scope with timeline commitments.", "tags": ["scope-management", "risk-management", "delivery", "planning"], "strength": 8 },
+          { "id": "b022", "text": "Led budget forecasting for new project proposals based on application team feedback and historical delivery data.", "tags": ["budget", "forecasting", "planning", "program-management"], "strength": 8 }
         ]
       },
       {
@@ -71,37 +69,17 @@
         "company": "Bank of America",
         "title": "Service Delivery Consultant / Tech Team Manager",
         "dates": "February 2012 – October 2018",
+        "role_description": "Served as application manager supporting different lines of business while overseeing multiple financial and regulatory risk aligned applications. Managed a team of business analysts and developers to support both BAU and Initiative efforts.",
         "bullets": [
-          {
-            "id": "b006",
-            "text": "Managed a 14-member team of business analysts and developers, responsible for hiring decisions that directly influenced team synergy and performance.",
-            "tags": ["people-management", "hiring", "team-building", "leadership"],
-            "strength": 9
-          },
-          {
-            "id": "b007",
-            "text": "Served as Application Manager for the Client and Account Closure Orchestration portal, supporting 8 lines of business and 5 regulatory groups.",
-            "tags": ["application-management", "regulatory", "enterprise", "multi-LOB"],
-            "strength": 9
-          },
-          {
-            "id": "b008",
-            "text": "Facilitated annual planning sessions with business partners and coordinated cross-team delivery for projects ranging from $250K to $1.5M.",
-            "tags": ["planning", "budget", "delivery", "business-alignment", "program-management"],
-            "strength": 8
-          },
-          {
-            "id": "b009",
-            "text": "Successfully supported Data Management applications for regulatory compliance, coordinating across enterprise infrastructure, architecture, and support teams.",
-            "tags": ["data-management", "regulatory-compliance", "enterprise-architecture", "infrastructure"],
-            "strength": 8
-          },
-          {
-            "id": "b010",
-            "text": "Managed teams using Agile-based project methods, facilitating requirements sessions with business partners and test planning sessions with QA teams.",
-            "tags": ["agile", "scrum", "QA", "requirements", "business-analysis"],
-            "strength": 7
-          }
+          { "id": "b023", "text": "Managed a 14-member team of business analysts and developers in a financial services matrixed environment, making hiring decisions that directly influenced team synergy and delivery performance.", "tags": ["people-management", "hiring", "team-building", "leadership", "matrixed"], "strength": 10 },
+          { "id": "b024", "text": "In the role of Application Manager supported 4 applications and all day-to-day activities and operations across multiple lines of business.", "tags": ["application-management", "operations", "multi-LOB", "leadership"], "strength": 8 },
+          { "id": "b025", "text": "In 2017 worked 36 releases to production for the applications supported, demonstrating high-volume delivery discipline.", "tags": ["release-management", "delivery", "devops", "volume"], "strength": 9 },
+          { "id": "b026", "text": "Facilitated annual planning sessions with business partners and led cross-team delivery for projects ranging from $250K to $1.5M, acting as a change agent to align technology execution with strategic business priorities.", "tags": ["planning", "budget", "delivery", "business-alignment", "change-management"], "strength": 9 },
+          { "id": "b027", "text": "Managed delivery teams using Agile, Waterfall, and iterative project methods, facilitating requirements and test planning sessions across multiple lines of business.", "tags": ["agile", "waterfall", "QA", "requirements", "business-analysis"], "strength": 8 },
+          { "id": "b028", "text": "Functioned as Application Manager for the Client and Account Closure Orchestration portal supporting eight lines of business and five regulatory groups within the firm.", "tags": ["application-management", "regulatory", "enterprise", "multi-LOB", "compliance"], "strength": 10 },
+          { "id": "b029", "text": "Worked with Jira to facilitate the Agile process across projects, managing backlogs, sprints, and delivery tracking.", "tags": ["agile", "jira", "scrum", "tools", "delivery"], "strength": 7 },
+          { "id": "b030", "text": "Supported all interactions with enterprise infrastructure, enterprise architecture, and Level 1 and 2 support teams across applications.", "tags": ["enterprise-architecture", "infrastructure", "support", "coordination"], "strength": 7 },
+          { "id": "b031", "text": "Application Manager that helped implement and support the Metadata Management Portal for data governance and regulatory compliance.", "tags": ["data-management", "metadata", "regulatory-compliance", "application-management"], "strength": 8 }
         ]
       },
       {
@@ -109,25 +87,12 @@
         "company": "Bank of America",
         "title": "Technical Project Team Manager",
         "dates": "August 2008 – February 2012",
+        "role_description": "Spearheaded technical team projects during all phases of the SDLC to completion. Managed and oversaw contractors, consultants and fulltime associates located in the U.S. and internationally.",
         "bullets": [
-          {
-            "id": "b011",
-            "text": "Led technical teams through all phases of the SDLC, managing contractors, consultants, and FTEs located in the US and internationally.",
-            "tags": ["SDLC", "international", "contractors", "technical-leadership"],
-            "strength": 8
-          },
-          {
-            "id": "b012",
-            "text": "Implemented a document management solution using the Google Search Appliance as part of the Client Onboarding program.",
-            "tags": ["document-management", "onboarding", "implementation", "technical"],
-            "strength": 7
-          },
-          {
-            "id": "b013",
-            "text": "Delivered multiple KYC (Know Your Customer) portal projects, creating front-end solutions for business partner use.",
-            "tags": ["KYC", "compliance", "front-end", "portal", "delivery"],
-            "strength": 7
-          }
+          { "id": "b032", "text": "Engaged with the Client Onboarding program to implement a document management solution using the Google Search appliance.", "tags": ["document-management", "onboarding", "implementation", "technical"], "strength": 7 },
+          { "id": "b033", "text": "Partnered with the Know Your Customer (KYC) program completing multiple projects to create a front end portal for business partners.", "tags": ["KYC", "compliance", "front-end", "portal", "delivery"], "strength": 8 },
+          { "id": "b034", "text": "Implemented a new frontend portal for the Party to Account program to drive efficiency and streamline processes.", "tags": ["front-end", "portal", "process-improvement", "delivery"], "strength": 7 },
+          { "id": "b035", "text": "Provided hands-on coding support when needed to help projects meet delivery timelines.", "tags": ["technical", "development", "hands-on", "delivery"], "strength": 6 }
         ]
       },
       {
@@ -135,37 +100,13 @@
         "company": "Bank of America",
         "title": "Web Application Architect",
         "dates": "February 2001 – August 2008",
+        "role_description": "Operated as senior developer for an Internet facing web based asset management system built on the Spring Framework, Hibernate and AJAX for the UI.",
         "bullets": [
-          {
-            "id": "b014",
-            "text": "Architected, designed, and developed an aircraft residual calculator for the Corporate Aircraft Finance Group of Bank of America Leasing, responsible for $1.2B in business.",
-            "tags": ["architecture", "development", "java", "finance", "high-impact"],
-            "strength": 10
-          },
-          {
-            "id": "b015",
-            "text": "Served as Technical Team Leader for bankofamericaleasing.com, the corporate site for a leasing company responsible for $32B in managed assets.",
-            "tags": ["technical-leadership", "web", "enterprise", "high-impact"],
-            "strength": 10
-          },
-          {
-            "id": "b016",
-            "text": "Selected by CIO to fill the role of Leasing Domain Architect, recognizing technical leadership and architectural expertise.",
-            "tags": ["architecture", "recognition", "leadership", "CIO"],
-            "strength": 9
-          },
-          {
-            "id": "b017",
-            "text": "Implemented Java-based solution to pull data from a Data Warehouse, convert to XML, and batch process with a third-party financial calculator to deliver daily portfolio profitability snapshots.",
-            "tags": ["java", "data-warehouse", "XML", "batch-processing", "finance", "development"],
-            "strength": 9
-          },
-          {
-            "id": "b018",
-            "text": "Led Computer Information Security assessments for all Leasing LOB applications, coordinating a team across 17 assessments and 5 project managers.",
-            "tags": ["security", "compliance", "assessment", "team-leadership"],
-            "strength": 8
-          }
+          { "id": "b036", "text": "Functioned as Architect, Designer and Developer on a project to create an aircraft residual calculator for the Corporate Aircraft Finance Group of Bank of America Leasing — generating $1.2B in business for 2006.", "tags": ["architecture", "development", "java", "finance", "high-impact"], "strength": 10 },
+          { "id": "b037", "text": "Served as Technical Team Leader for www.bankofamericaleasing.com, a leasing company responsible for $32B in managed assets.", "tags": ["technical-leadership", "web", "enterprise", "high-impact"], "strength": 10 },
+          { "id": "b038", "text": "Recognized and selected by CIO to fill the role of Leasing Domain Architect, recognizing technical leadership and architectural expertise.", "tags": ["architecture", "recognition", "leadership", "CIO"], "strength": 9 },
+          { "id": "b039", "text": "Implemented Java to pull data from a Data Warehouse, convert to XML and batch process with a third party financial calculator to give daily portfolio profitability snapshots.", "tags": ["java", "data-warehouse", "XML", "batch-processing", "finance", "development"], "strength": 9 },
+          { "id": "b040", "text": "Operated as Team Leader for Computer Information Security assessments for all Leasing LOB applications, coordinating a team across 17 assessments and 5 project managers.", "tags": ["security", "compliance", "assessment", "team-leadership", "risk-management"], "strength": 8 }
         ]
       },
       {
@@ -173,26 +114,24 @@
         "company": "Click2Learn.com",
         "title": "Senior Developer",
         "dates": "February 2000 – January 2001",
+        "role_description": "Acted as senior developer for Custom Services Group providing eLearning software development services for Fortune 1000 companies.",
         "bullets": [
-          {
-            "id": "b019",
-            "text": "Delivered eLearning software development projects for Fortune 1000 companies including Microsoft, Prudential, Fidelity, and Princeton Review.",
-            "tags": ["development", "eLearning", "Fortune1000", "java", "javascript"],
-            "strength": 7
-          }
+          { "id": "b041", "text": "Completed projects with Microsoft, Prudential, Fidelity, Princeton Review and Data Dimension International.", "tags": ["development", "eLearning", "Fortune1000", "client-delivery"], "strength": 7 },
+          { "id": "b042", "text": "Used Java, ASP, DHTML, CSS and JavaScript to build web sites collecting user data for Fortune 1000 clients.", "tags": ["java", "javascript", "web", "development"], "strength": 6 },
+          { "id": "b043", "text": "Database Administrator for SQL Server databases used to collect and manage client data across projects.", "tags": ["SQL", "database", "administration", "data-management"], "strength": 7 },
+          { "id": "b044", "text": "Presented completed projects to clients including Microsoft and Data Dimension International.", "tags": ["client-management", "presentation", "communication"], "strength": 6 }
         ]
       }
     ],
-  
     "skills": {
-      "delivery": ["IT Delivery Management", "Program Management", "Project Management", "SDLC", "Risk Management", "Stakeholder Management", "Vendor Management", "Offshore Team Management", "Budget Management"],
-      "methodology": ["Agile", "Scrum", "Waterfall", "SDLC", "PMP"],
+      "delivery": ["IT Delivery Management", "Program Management", "Project Management", "SDLC", "Risk Management", "Stakeholder Management", "Vendor Management", "Offshore Team Management", "Budget Management", "Release Management", "Change Management", "Scope Management"],
+      "methodology": ["Agile", "Scrum", "Waterfall", "Iterative", "SDLC", "ITSM", "ITIL"],
       "technical": ["Java", "Spring Framework", "Hibernate", "AJAX", "XML", "SQL", "Python", "JavaScript", "HTML", "CSS", "ASP"],
-      "ai_tools": ["Claude API", "Prompt Engineering", "LLM Workflows", "AI Agents"],
-      "platforms": ["AWS", "GitHub", "Git"],
-      "domain": ["Financial Services", "Regulatory Compliance", "Data Management", "Application Management", "eLearning"]
+      "tools": ["Jira", "ServiceNow", "Clarity", "PlanView", "CMDB", "GitHub", "Git"],
+      "ai_tools": ["Claude API", "Prompt Engineering", "LLM Workflows", "AI Agents", "Python AI Development"],
+      "platforms": ["AWS", "GitHub"],
+      "domain": ["Financial Services", "Regulatory Compliance", "Data Management", "Application Management", "eLearning", "Retirement Services"]
     },
-  
     "projects": [
       {
         "id": "proj001",
@@ -201,10 +140,9 @@
         "github": "github.com/darrowj/ai-job-search",
         "description": "Built an AI-powered job search agent that scrapes job boards, filters by criteria, tailors resumes and cover letters using the Claude API, and tracks application progress through a full pipeline.",
         "tags": ["python", "llm", "claude-api", "automation", "ai", "agents"],
-        "status": "In Progress - Wave 0"
+        "status": "In Progress - Wave 2 Complete"
       }
     ],
-  
     "education": [
       {
         "degree": "Master of Science, Information Systems (Distinction)",
@@ -215,26 +153,26 @@
         "school": "Northeastern University"
       }
     ],
-  
     "certifications": [
-      {
-        "name": "Project Management Professional (PMP)",
-        "valid": "October 2018 – October 2026"
-      },
-      {
-        "name": "Certified ScrumMaster (CSM)",
-        "valid": "January 2018 – January 2026"
-      },
-      {
-        "name": "Retirement Income Certified Professional (RICP)",
-        "valid": "April 2022 – December 2025"
-      }
+      { "name": "Project Management Professional (PMP)", "valid": "October 2018 – October 2026", "status": "active" },
+      { "name": "Certified ScrumMaster (CSM)", "valid": "January 2018 – January 2026", "status": "active" },
+      { "name": "Retirement Income Certified Professional (RICP)", "valid": "April 2022 – December 2025", "status": "active" },
+      { "name": "AWS Certified Solutions Architect – Associate", "valid": "Expired 2019", "status": "expired", "notes": "Active renewal planned" }
     ],
-  
+    "military": {
+      "branch": "United States Air Force",
+      "years": "4 years",
+      "rank_at_discharge": "Senior Airman",
+      "discharge": "Honorable Discharge"
+    },
+    "personal": {
+      "bjj_black_belt": true,
+      "bjj_notes": "Brazilian Jiu-Jitsu Black Belt — reflects long-term discipline, resilience, and commitment to continuous improvement"
+    },
     "metadata": {
-      "last_updated": "2026-05-10",
-      "version": 1,
+      "last_updated": "2026-05-13",
+      "version": 2,
       "source_resume": "Jason_Darrow_Resume_v11.docx",
-      "target_roles": ["IT Delivery Manager", "Program Manager", "Technical Program Manager", "AI Operations Manager", "Digital Transformation Lead"]
+      "target_roles": ["IT Delivery Manager", "Program Manager", "Technical Program Manager", "AI Operations Manager", "Digital Transformation Lead", "Service Delivery Manager"]
     }
   }
