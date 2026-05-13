@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jason Darrow — Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:      #0f0e0c;
+      --paper:    #f5f2eb;
+      --accent:   #2d5a27;
+      --muted:    #6b6760;
+      --border:   #d4cfc6;
+      --code-bg:  #1a1916;
+      --code-fg:  #a8e6a3;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 3rem;
+      background: var(--paper);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 5rem;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 4rem 6rem 5rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .hero-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.2s;
+    }
+
+    .hero-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(3.5rem, 6vw, 5.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.4s;
+    }
+
+    .hero-name em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-intro {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 42ch;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.6s;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards 0.8s;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .btn-accent:hover {
+      background: #1e3d1a;
+      border-color: #1e3d1a;
+      color: white;
+    }
+
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem 5rem 6rem 4rem;
+      gap: 1.5rem;
+    }
+
+    .stat-card {
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.5s; }
+    .stat-card:nth-child(2) { animation-delay: 0.65s; }
+    .stat-card:nth-child(3) { animation-delay: 0.8s; }
+    .stat-card:nth-child(4) { animation-delay: 0.95s; }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      line-height: 1.2;
+    }
+
+    /* ── SECTION BASE ── */
+    section {
+      padding: 6rem 5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+      margin-bottom: 3rem;
+    }
+
+    /* ── PROJECT ── */
+    .project-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+
+    .project-main {
+      padding: 3rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .project-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .project-desc {
+      color: var(--muted);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .project-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .project-sidebar {
+      padding: 3rem;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .terminal {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+    }
+
+    .terminal-line { display: block; }
+    .terminal-prompt { color: var(--code-fg); }
+    .terminal-comment { color: #666; }
+    .terminal-output { color: #ccc; padding-left: 1rem; }
+
+    /* ── WAVES ── */
+    .waves-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+
+    .wave-card {
+      padding: 2rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
+    .wave-card:last-child { border-right: none; }
+
+    .wave-number {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .wave-title {
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .wave-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .wave-status {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 1rem;
+      padding: 0.25rem 0.6rem;
+      display: inline-block;
+    }
+
+    .status-done {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-active {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .status-next {
+      background: var(--border);
+      color: var(--muted);
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+
+    .about-text {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .about-text p { margin-bottom: 1.2rem; }
+
+    .credentials {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .credential {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.2rem;
+      border: 1px solid var(--border);
+    }
+
+    .credential-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .credential-label {
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .credential-detail {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── CONTACT ── */
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+
+    .contact-left {
+      padding: 3rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .contact-right {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.2rem;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .contact-link-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .contact-link-value {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 6rem 2rem 3rem; border-right: none; border-bottom: 1px solid var(--border); }
+      .hero-right { padding: 3rem 2rem; }
+      section { padding: 4rem 2rem; }
+      .project-grid { grid-template-columns: 1fr; }
+      .project-main { border-right: none; border-bottom: 1px solid var(--border); }
+      .waves-grid { grid-template-columns: 1fr 1fr; }
+      .wave-card:nth-child(2) { border-right: none; }
+      .about-grid { grid-template-columns: 1fr; }
+      .contact-inner { grid-template-columns: 1fr; }
+      .contact-left { border-right: none; border-bottom: 1px solid var(--border); }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-name">Jason Darrow</a>
+    <ul class="nav-links">
+      <li><a href="#project">Project</a></li>
+      <li><a href="#waves">Progress</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" style="border-top: none; padding: 0;">
+    <div class="hero-left">
+      <p class="hero-tag">IT Leader · AI Builder · US Air Force Veteran</p>
+      <h1 class="hero-name">Jason<br><em>Darrow</em></h1>
+      <p class="hero-intro">
+        I'm a builder — in the real world and the virtual one. 
+        20 years delivering software. Recently back to hands-on 
+        building, learning AI by doing. The results have been 
+        surprising, even to me.
+      </p>
+      <div class="hero-links">
+        <a href="#project" class="btn btn-accent">See the Project</a>
+        <a href="https://github.com/darrowj/ai-job-search" target="_blank" class="btn">GitHub →</a>
+        <a href="https://linkedin.com/in/jasondarrow" target="_blank" class="btn">LinkedIn →</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="stat-card">
+        <div class="stat-label">Background</div>
+        <div class="stat-value">Delivering IT Solutions for 20 Years</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Current Project</div>
+        <div class="stat-value">AI Job Search System</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Stack</div>
+        <div class="stat-value">Python · Claude API · AWS</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Status</div>
+        <div class="stat-value">Actively Building</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECT -->
+  <section id="project">
+    <p class="section-tag">Wave 1 – 2 Complete</p>
+    <h2 class="section-title">AI Job Search System</h2>
+    <div class="project-grid">
+      <div class="project-main">
+        <h3 class="project-title">What I Built</h3>
+        <p class="project-desc">
+          A personal AI agent that finds job listings, scores them against 
+          my experience, tailors my resume for each role using the Claude API, 
+          and generates a submission-ready Word document — all from the command line.
+          Built to solve my own job search problem while learning AI development.
+        </p>
+        <p class="project-desc">
+          The system scrapes multiple job boards across multiple locations, 
+          enriches listings with company intelligence, and uses a 53-bullet 
+          master resume database to select the most relevant content for each role.
+        </p>
+        <div class="project-stack">
+          <span class="tag">Python 3</span>
+          <span class="tag">Claude API</span>
+          <span class="tag">JSearch API</span>
+          <span class="tag">NewsAPI</span>
+          <span class="tag">python-docx</span>
+          <span class="tag">pandas</span>
+          <span class="tag">BeautifulSoup</span>
+          <span class="tag">Git</span>
+        </div>
+        <div class="hero-links">
+          <a href="https://github.com/darrowj/ai-job-search" target="_blank" class="btn btn-accent">View on GitHub →</a>
+        </div>
+      </div>
+      <div class="project-sidebar">
+        <div class="terminal">
+          <span class="terminal-line terminal-comment"># Find jobs across locations</span>
+          <span class="terminal-line">
+            <span class="terminal-prompt">$ </span>python3 job_scraper.py \
+          </span>
+          <span class="terminal-line terminal-output">--titles "IT Delivery Manager" "Program Manager" \</span>
+          <span class="terminal-line terminal-output">--locations "Boston MA" "Worcester MA"</span>
+          <br>
+          <span class="terminal-line terminal-comment"># Tailor resume to a specific role</span>
+          <span class="terminal-line">
+            <span class="terminal-prompt">$ </span>python3 resume_tailor.py \
+          </span>
+          <span class="terminal-line terminal-output">--company "Fidelity" \</span>
+          <span class="terminal-line terminal-output">--url "https://linkedin.com/..."</span>
+          <br>
+          <span class="terminal-line terminal-comment"># Generate Word doc</span>
+          <span class="terminal-line">
+            <span class="terminal-prompt">$ </span>python3 resume_generator.py \
+          </span>
+          <span class="terminal-line terminal-output">--input tailored_Fidelity.json</span>
+          <br>
+          <span class="terminal-line" style="color: #a8e6a3;">✓ Match score: 93 / 100</span>
+          <span class="terminal-line" style="color: #a8e6a3;">✓ Resume saved: Jason_Darrow_Resume.docx</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAVES / PROGRESS -->
+  <section id="waves">
+    <p class="section-tag">Build Log</p>
+    <h2 class="section-title">Project Progress</h2>
+    <div class="waves-grid">
+      <div class="wave-card">
+        <div class="wave-number">0</div>
+        <div class="wave-title">Resume Database</div>
+        <div class="wave-desc">Structured master resume in JSON — 53 bullets tagged by skill, strength scored, ready for AI selection.</div>
+        <span class="wave-status status-done">Complete</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">1</div>
+        <div class="wave-title">Job Scraper</div>
+        <div class="wave-desc">Multi-location, multi-title job search across job boards. Outputs to Excel with company enrichment via NewsAPI.</div>
+        <span class="wave-status status-done">Complete</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">2</div>
+        <div class="wave-title">AI Resume Tailor</div>
+        <div class="wave-desc">Claude API reads job description, selects best-fit bullets, rewrites summary, generates Word doc. 93/100 match score.</div>
+        <span class="wave-status status-done">Complete</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">3</div>
+        <div class="wave-title">Application Tracker</div>
+        <div class="wave-desc">SQLite database to track applications from submission through offer. Dashboard to monitor pipeline status.</div>
+        <span class="wave-status status-next">Coming Soon</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <p class="section-tag">Background</p>
+    <h2 class="section-title">About Me</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          I spent 20 years building and delivering software — starting as a 
+          web application architect at Bank of America, where I built systems 
+          responsible for billions in managed assets, and progressing to IT 
+          Delivery Manager at Voya Financial overseeing programs from $250K to $3M.
+        </p>
+        <p>
+          In May 2026 I was laid off. Instead of just sending resumes, I decided 
+          to build the tool I wished existed — an AI system that finds relevant 
+          jobs, tailors my resume to each one, and tracks my progress. 
+          This site documents that project.
+        </p>
+        <p>
+          I'm learning AI by doing, not watching. Every week something new 
+          gets built, committed to GitHub, and added to the system. 
+          The results have been genuinely surprising.
+        </p>
+      </div>
+      <div class="credentials">
+        <div class="credential">
+          <div class="credential-icon">🎓</div>
+          <div>
+            <div class="credential-label">Education</div>
+            <div class="credential-detail">MS Information Systems — Bentley College (Distinction)</div>
+            <div class="credential-detail" style="margin-top:0.3rem;">BS Management of Information Systems — Northeastern University (Magna Cum Laude)</div>
+          </div>
+        </div>
+        <div class="credential">
+          <div class="credential-icon">📋</div>
+          <div>
+            <div class="credential-label">PMP · CSM Certified</div>
+            <div class="credential-detail">Project Management Professional · Certified ScrumMaster</div>
+          </div>
+        </div>
+        <div class="credential">
+          <div class="credential-icon">🛩️</div>
+          <div>
+            <div class="credential-label">US Air Force Veteran</div>
+            <div class="credential-detail">Senior Airman · Honorable Discharge</div>
+          </div>
+        </div>
+        <div class="credential">
+          <div class="credential-icon">🥋</div>
+          <div>
+            <div class="credential-label">BJJ Black Belt</div>
+            <div class="credential-detail">Brazilian Jiu-Jitsu — the hardest thing I've ever done</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-tag">Get In Touch</p>
+    <h2 class="section-title">Let's Talk</h2>
+    <div class="contact-inner">
+      <div class="contact-left">
+        <p style="font-size: 1.05rem; color: var(--muted); line-height: 1.8; margin-bottom: 1.5rem;">
+          I'm currently open to IT Delivery Manager, Program Manager, 
+          and AI Operations roles in the Greater Boston area and remote.
+        </p>
+        <p style="font-size: 1.05rem; color: var(--muted); line-height: 1.8;">
+          If you're building something interesting with AI, or know someone 
+          who needs a delivery leader who can actually build — I'd love to hear from you.
+        </p>
+      </div>
+      <div class="contact-right">
+        <a href="mailto:Jason@JasonDarrow.com" class="contact-link">
+          <div>
+            <span class="contact-link-label">Email</span>
+            <span class="contact-link-value">Jason@JasonDarrow.com</span>
+          </div>
+        </a>
+        <a href="https://linkedin.com/in/jasondarrow" target="_blank" class="contact-link">
+          <div>
+            <span class="contact-link-label">LinkedIn</span>
+            <span class="contact-link-value">linkedin.com/in/jasondarrow</span>
+          </div>
+        </a>
+        <a href="https://github.com/darrowj/ai-job-search" target="_blank" class="contact-link">
+          <div>
+            <span class="contact-link-label">GitHub</span>
+            <span class="contact-link-value">github.com/darrowj/ai-job-search</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Jason Darrow — Built with Python, Claude API, and stubbornness.</p>
+    <p>jasondarrow.com</p>
+  </footer>
+
+</body>
+</html>
