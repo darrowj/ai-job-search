@@ -4,13 +4,19 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import json
+import argparse
+
+parser = argparse.ArgumentParser(description="Generate tailored resume Word doc")
+parser.add_argument("--input", required=True, help="Tailored JSON file to use")
+parser.add_argument("--output", default="Jason_Darrow_Resume.docx", help="Output filename")
+args = parser.parse_args()
 
 # ── Load data ──────────────────────────────────────────────────────────────
 
 with open("master_resume.json", "r") as f:
     master = json.load(f)
 
-with open("tailored_output.json", "r") as f:
+with open(args.input, "r") as f:
     tailored = json.load(f)
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -315,5 +321,5 @@ for cert in [
 
 # ── Save ──────────────────────────────────────────────────────────────────
 
-doc.save("Jason_Darrow_Resume.docx")
-print("Resume saved: Jason_Darrow_Resume_tailored.docx")
+doc.save(args.output)
+print(f"Resume saved: {args.output}")

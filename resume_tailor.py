@@ -1,5 +1,8 @@
 import anthropic
 import json
+import argparse
+import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 # Load API keys from .env
@@ -8,6 +11,36 @@ load_dotenv()
 # Load your master resume
 with open("master_resume.json", "r") as f:
     master_resume = json.load(f)
+
+# ── Fetch job description from URL ─────────────────────────────────────────
+
+def fetch_job_description(url):
+    print(f"Fetching job description from: {url}")
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Remove noise
+        for tag in soup(["nav", "header", "footer", "script", "style", "aside"]):
+            tag.decompose()
+
+        # Get clean text
+        text = soup.get_text(separator=" ", strip=True)
+
+        # Trim to reasonable size for the API
+        text = text[:4000]
+
+        print(f"Fetched {len(text)} characters of job description.")
+        return text
+
+    except Exception as e:
+        print(f"Error fetching URL: {e}")
+        return None
+
+# ── Tailor resume using Claude API ────────────────────────────────────────
 
 def tailor_resume(job_title, job_description):
     print(f"Tailoring resume for: {job_title}...")
@@ -50,7 +83,7 @@ Return your response in this exact JSON format:
 
     message = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=1024,
+        max_tokens=4096,
         messages=[
             {"role": "user", "content": prompt}
         ]
@@ -66,33 +99,39 @@ Return your response in this exact JSON format:
 
     return result
 
-# Job details
-job_title = "Manager, IT Delivery Team"
-job_description = """
-This position is responsible for leading the successful delivery of 
-Strategic programs across Technology and Innovation. This position will 
-lead the remediation efforts of various projects focused on delivering 
-execution in a matrixed environment. The person in this role engages with 
-all levels of staff and management in the technology and business units. 
-This role operates in a fast-paced environment with teams of motivated 
-colleagues to deliver high quality solutions that add value to colleague 
-and client experiences. Successful incumbent will be capable of working 
-in a rapidly changing industry/environment, can tolerate ambiguity, 
-demonstrate problem-solving leadership and act as a change agent at both 
-the organizational level and via solutions delivery.
+# ── Main ──────────────────────────────────────────────────────────────────
 
-Required: 10 years IT experience, 10 years Program/Project Management, 
-7 years Financial Services, 5 years process improvement, 6 years 
-supervisory experience. PMP or CSM preferred. Agile, waterfall, iterative 
-delivery experience. Vendor management. Stakeholder management.
-"""
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Tailor resume to a job description")
+    parser.add_argument("--title",       help="Job title (optional if using --url)")
+    parser.add_argument("--company",     required=True, help="Company name")
+    parser.add_argument("--description", help="Job description text")
+    parser.add_argument("--url",         help="URL of the job posting page")
+    args = parser.parse_args()
 
-# Run the tailoring
-result = tailor_resume(job_title, job_description)
+    # Get description from URL or direct input
+    if args.url:
+        description = fetch_job_description(args.url)
+        if not description:
+            print("Failed to fetch job description. Try --description instead.")
+            exit(1)
+        title = args.title or "Position"
+    elif args.description:
+        description = args.description
+        title = args.title or "Position"
+    else:
+        print("Error: provide either --url or --description")
+        exit(1)
 
-# Save output for resume generator
-with open("tailored_output.json", "w") as f:
-    json.dump(result, f, indent=2)
+    # Run the tailoring
+    result = tailor_resume(title, description)
 
-print("Tailoring complete. Match score:", result["match_score"])
-print("Saved to tailored_output.json")
+    # Save output named by company
+    output_file = f"tailored_{args.company.replace(' ', '_')}.json"
+    with open(output_file, "w") as f:
+        json.dump(result, f, indent=2)
+
+    print(f"\nTailoring complete.")
+    print(f"Match score:  {result['match_score']} / 100")
+    print(f"Key skills:   {', '.join(result['key_skills'])}")
+    print(f"Saved to:     {output_file}")
