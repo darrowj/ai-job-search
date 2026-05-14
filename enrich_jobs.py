@@ -27,8 +27,8 @@ def get_wikipedia_summary(company_name):
     except:
         return ""
 
-def get_news(company_name, num_articles=3):
-    """Pull recent news headlines from NewsAPI."""
+def get_news_articles(company_name, num_articles=3):
+    """Pull recent news from NewsAPI: display line + article URL per item."""
     try:
         url = "https://newsapi.org/v2/everything"
         params = {
@@ -44,13 +44,15 @@ def get_news(company_name, num_articles=3):
         if response.status_code == 200:
             articles = response.json().get("articles", [])
             print(f"  Articles returned: {len(articles)}")
-            headlines = []
+            out = []
             for a in articles:
-                title = a.get("title", "")
-                published = a.get("publishedAt", "")[:10]
-                source = a.get("source", {}).get("name", "")
-                headlines.append(f"{published} [{source}]: {title}")
-            return headlines
+                title = a.get("title", "") or ""
+                published = (a.get("publishedAt") or "")[:10]
+                source = (a.get("source") or {}).get("name", "") or ""
+                line = f"{published} [{source}]: {title}"
+                article_url = (a.get("url") or "").strip()
+                out.append({"line": line, "url": article_url})
+            return out
         else:
             print(f"  News API error: {response.json().get('message', 'Unknown error')}")
         return []
@@ -58,15 +60,17 @@ def get_news(company_name, num_articles=3):
         print(f"  News fetch error: {e}")
         return []
 
-def get_company_intel(company_name, job_title):
+
+def get_company_intel(company_name, job_title, news_articles=None):
     """Use Claude to synthesize all available data into a structured brief."""
     wiki = get_wikipedia_summary(company_name)
-    news = get_news(company_name)
-
-    news_text = "\n".join(news) if news else "No recent news found."
+    if news_articles is None:
+        news_articles = get_news_articles(company_name)
+    news_lines = [x["line"] for x in news_articles] if news_articles else []
+    news_text = "\n".join(news_lines) if news_lines else "No recent news found."
 
     print(f"  Wikipedia data: {'Found' if wiki else 'Not found'}")
-    print(f"  News headlines: {len(news)} found")
+    print(f"  News headlines: {len(news_articles)} found")
 
     prompt = f"""
 You are a business intelligence analyst. Based on the information below,
@@ -109,6 +113,22 @@ Return ONLY a JSON object in this exact format — no other text:
     start = response_text.find("{")
     end = response_text.rfind("}") + 1
     return json.loads(response_text[start:end])
+
+
+def _normalize_founded_value(raw) -> str:
+    """Avoid Excel float year artifacts when saving (e.g. store 1995 not 1995.0)."""
+    if raw is None:
+        return ""
+    s = str(raw).strip()
+    if not s:
+        return ""
+    try:
+        f = float(s.replace(",", ""))
+        if f == int(f) and 1000 <= abs(f) <= 9999:
+            return str(int(f))
+    except ValueError:
+        pass
+    return s
 
 # ── Text wrap columns in Excel ─────────────────────────────────────────────
 
@@ -170,7 +190,9 @@ def enrich_jobs(excel_file="job_listings.xlsx"):
     # Add new columns if they don't exist
     new_cols = ["Industry", "HQ Location", "Company Size", "Founded",
                 "Market Cap", "Description", "Stability", "Growth Trend",
-                "News 1", "News 2", "News 3", "Recommendation", "Enriched Date"]
+                "News 1", "News 2", "News 3",
+                "News 1 URL", "News 2 URL", "News 3 URL",
+                "Recommendation", "Enriched Date"]
     for col in new_cols:
         if col not in df.columns:
             df[col] = ""
@@ -182,12 +204,13 @@ def enrich_jobs(excel_file="job_listings.xlsx"):
         print(f"\nResearching: {company}...")
 
         try:
-            intel = get_company_intel(company, title)
+            news_articles = get_news_articles(company)
+            intel = get_company_intel(company, title, news_articles=news_articles)
 
             df.at[idx, "Industry"]       = intel.get("industry", "")
             df.at[idx, "HQ Location"]    = intel.get("hq_location", "")
             df.at[idx, "Company Size"]   = intel.get("company_size", "")
-            df.at[idx, "Founded"]        = intel.get("founded", "")
+            df.at[idx, "Founded"]        = _normalize_founded_value(intel.get("founded", ""))
             df.at[idx, "Market Cap"]     = intel.get("market_cap", "")
             df.at[idx, "Description"]    = intel.get("description", "")
             df.at[idx, "Stability"]      = intel.get("stability", "")
@@ -195,6 +218,10 @@ def enrich_jobs(excel_file="job_listings.xlsx"):
             df.at[idx, "News 1"]         = intel.get("news_1", "")
             df.at[idx, "News 2"]         = intel.get("news_2", "")
             df.at[idx, "News 3"]         = intel.get("news_3", "")
+            for i in range(3):
+                col_url = f"News {i + 1} URL"
+                u = news_articles[i]["url"] if i < len(news_articles) else ""
+                df.at[idx, col_url] = u or ""
             df.at[idx, "Recommendation"] = intel.get("recommendation", "")
             df.at[idx, "Enriched Date"]  = str(date.today())
 
