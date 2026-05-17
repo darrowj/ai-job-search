@@ -525,30 +525,32 @@
 
   <!-- PROJECT -->
   <section id="project">
-    <p class="section-tag">Wave 1 – 2 Complete</p>
+    <p class="section-tag">Waves 0 – 4 Complete</p>
     <h2 class="section-title">AI Job Search System</h2>
     <div class="project-grid">
       <div class="project-main">
         <h3 class="project-title">What I Built</h3>
         <p class="project-desc">
-          A personal AI agent that finds job listings, scores them against 
-          my experience, tailors my resume for each role using the Claude API, 
+          A personal AI agent that finds job listings, scores them against
+          my experience, tailors my resume for each role using the Claude API,
           and generates a submission-ready Word document — all from the command line.
           Built to solve my own job search problem while learning AI development.
         </p>
         <p class="project-desc">
-          The system scrapes multiple job boards across multiple locations, 
-          enriches listings with company intelligence, and uses a 53-bullet 
-          master resume database to select the most relevant content for each role.
+          The system scrapes multiple job boards across multiple locations,
+          enriches listings with company intelligence, filters by salary and relevance
+          using a config-driven allowlist, and uses a 53-bullet master resume database
+          to select the most relevant content for each role.
         </p>
         <div class="project-stack">
           <span class="tag">Python 3</span>
           <span class="tag">Claude API</span>
-          <span class="tag">JSearch API</span>
+          <span class="tag">Adzuna API</span>
           <span class="tag">NewsAPI</span>
           <span class="tag">python-docx</span>
           <span class="tag">pandas</span>
           <span class="tag">BeautifulSoup</span>
+          <span class="tag">AWS S3</span>
           <span class="tag">Git</span>
         </div>
         <div class="hero-links">
@@ -557,12 +559,15 @@
       </div>
       <div class="project-sidebar">
         <div class="terminal">
-          <span class="terminal-line terminal-comment"># Find jobs across locations</span>
+          <span class="terminal-line terminal-comment"># Configure search in search_config.json</span>
+          <span class="terminal-line terminal-comment"># titles, locations, filters — all in one place</span>
+          <br>
+          <span class="terminal-line terminal-comment"># Run the scraper</span>
           <span class="terminal-line">
-            <span class="terminal-prompt">$ </span>python3 job_scraper.py \
+            <span class="terminal-prompt">$ </span>python3 job_scraper.py
           </span>
-          <span class="terminal-line terminal-output">--titles "IT Delivery Manager" "Program Manager" \</span>
-          <span class="terminal-line terminal-output">--locations "Boston MA" "Worcester MA"</span>
+          <span class="terminal-line" style="color: #a8e6a3;">✓ 42 jobs found · 18 passed filters</span>
+          <span class="terminal-line" style="color: #a8e6a3;">✓ Saved: job_listings_2026-05-17.xlsx</span>
           <br>
           <span class="terminal-line terminal-comment"># Tailor resume to a specific role</span>
           <span class="terminal-line">
@@ -571,7 +576,7 @@
           <span class="terminal-line terminal-output">--company "Fidelity" \</span>
           <span class="terminal-line terminal-output">--url "https://linkedin.com/..."</span>
           <br>
-          <span class="terminal-line terminal-comment"># Generate Word doc</span>
+          <span class="terminal-line terminal-comment"># Generate submission-ready Word doc</span>
           <span class="terminal-line">
             <span class="terminal-prompt">$ </span>python3 resume_generator.py \
           </span>
@@ -598,7 +603,7 @@
       <div class="wave-card">
         <div class="wave-number">1</div>
         <div class="wave-title">Job Scraper</div>
-        <div class="wave-desc">Multi-location, multi-title job search across job boards. Outputs to Excel with company enrichment via NewsAPI.</div>
+        <div class="wave-desc">Config-driven job search via Adzuna API. Filters by salary, recency, job type, and title allowlist. Outputs to dated Excel.</div>
         <span class="wave-status status-done">Complete</span>
       </div>
       <div class="wave-card">
@@ -608,10 +613,34 @@
         <span class="wave-status status-done">Complete</span>
       </div>
       <div class="wave-card">
+        <div class="wave-number">2.5</div>
+        <div class="wave-title">Company Intelligence</div>
+        <div class="wave-desc">Enriches shortlisted roles with company background, recent news, and industry data via Wikipedia and NewsAPI.</div>
+        <span class="wave-status status-done">Complete</span>
+      </div>
+      <div class="wave-card">
         <div class="wave-number">3</div>
+        <div class="wave-title">HTML Job Report</div>
+        <div class="wave-desc">Generates a formatted HTML report of enriched listings with company briefs and one-click resume tailor commands.</div>
+        <span class="wave-status status-done">Complete</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">4</div>
+        <div class="wave-title">Portfolio Site</div>
+        <div class="wave-desc">This site — documenting the project, the journey, and the build. Hosted on AWS S3 with Route 53.</div>
+        <span class="wave-status status-done">Complete</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">5</div>
         <div class="wave-title">Application Tracker</div>
         <div class="wave-desc">SQLite database to track applications from submission through offer. Dashboard to monitor pipeline status.</div>
-        <span class="wave-status status-next">Coming Soon</span>
+        <span class="wave-status status-next">Planned</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">6</div>
+        <div class="wave-title">Expanded Search</div>
+        <div class="wave-desc">Additional job source integrations for broader, fresher listings across more platforms.</div>
+        <span class="wave-status status-next">Planned</span>
       </div>
     </div>
   </section>

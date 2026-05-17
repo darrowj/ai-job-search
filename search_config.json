@@ -1,0 +1,22 @@
+{
+  "_comment_titles": "Job titles to search. Use full titles as they appear on job boards. Add as many as needed. Examples: 'IT Delivery Manager', 'Program Manager', 'Technical Project Manager'",
+  "titles": ["IT Delivery Manager", "Project Manager", "Program Manager", "IT Program Manager", "Service Delivery Manager"],
+
+  "_comment_locations": "City and state to search. Format: 'City ST'. Add multiple to cast a wider net. Examples: 'Boston MA', 'Worcester MA', 'Providence RI'",
+  "locations": ["Boston MA", "Worcester MA", "Providence RI", "Nashua NH" ],
+
+  "_comment_require_title_keywords": "At least ONE of these words must appear in the job title or the result is dropped. This keeps noise out. Case-insensitive. Tune this list if you are getting unrelated results.",
+  "require_title_keywords": ["delivery", "program manager", "project manager", "technical program", "IT manager", "technology manager", "PMO", "portfolio manager"],
+
+  "_comment_max_days_old": "Drop any listing older than this many days. Keeps your pipeline fresh. Recommended: 14. Set to 30 if volume is too low.",
+  "max_days_old": 14,
+
+  "_comment_job_type": "Filter by employment type. Options: 'full_time', 'contract', 'part_time'. Leave as empty string '' to return all types.",
+  "job_type": "",
+
+  "_comment_pages": "Number of pages to fetch from the API. Each page returns up to 50 results. Start with 2. Increase if you are not seeing enough listings.",
+  "pages": 2,
+
+  "_comment_min_salary": "Salary floor is configured privately in your .env file as MIN_SALARY=100000. It is intentionally excluded here to protect salary negotiation position.",
+  "_note_min_salary": "See .env file — set MIN_SALARY to your minimum acceptable salary."
+}

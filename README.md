@@ -21,29 +21,31 @@ Built as a hands-on learning project to develop real AI engineering skills while
 ## The workflow
 
 ```
-1. python3 job_scraper.py --titles "IT Delivery Manager" "Program Manager" \
-                          --locations "Boston MA" "Worcester MA"
-   → job_listings_2026-05-14.xlsx
+1. Edit search_config.json
+   → set titles, locations, filters, salary floor (salary set privately in .env)
 
-2. Open Excel → mark interesting roles as "Interested"
+2. python3 job_scraper.py
+   → job_listings_2026-05-17.xlsx (filtered, deduped, dated)
 
-3. python3 enrich_jobs.py
+3. Open Excel → mark interesting roles as "Interested"
+
+4. python3 enrich_jobs.py
    → pulls company intel for Interested rows
-   → generates job_report_2026-05-14.html
+   → generates job_report_2026-05-17.html
 
-4. Open HTML report in browser
+5. Open HTML report in browser
    → read company briefs
    → copy tailor command for roles you want to apply to
 
-5. python3 resume_tailor.py --company "Fidelity" \
+6. python3 resume_tailor.py --company "Fidelity" \
                              --title "Technical Project Delivery Manager" \
                              --url "https://linkedin.com/jobs/..."
    → tailored_Fidelity.json (match score, selected bullets)
 
-6. python3 resume_generator.py --input tailored_Fidelity.json
+7. python3 resume_generator.py --input tailored_Fidelity.json
    → Jason_Darrow_Resume.docx
 
-7. Review, edit, export to PDF, submit
+8. Review, edit, export to PDF, submit
 ```
 
 ---
@@ -70,12 +72,14 @@ Built as a hands-on learning project to develop real AI engineering skills while
 
 ```
 job_scraper.py          Search job boards, output to Excel
+search_config.json      Search preferences — titles, locations, filters (committed)
 enrich_jobs.py          Enrich Interested listings with company intel
 report_generator.py     Generate HTML report from enriched listings
 resume_tailor.py        AI resume tailoring via Claude API
 resume_generator.py     Generate Word doc from tailored JSON
 master_resume.json      53-bullet career database with tags and strength scores
 index.html              Portfolio site source
+.env                    API keys + MIN_SALARY (never committed)
 ```
 
 ---
@@ -84,9 +88,13 @@ index.html              Portfolio site source
 
 **Master resume as a database** — instead of one static resume, all career experience lives in a JSON file with 53 bullets tagged by skill category and scored by strength. The AI selects the best 5-6 per role rather than showing everything.
 
-**Iterative waves** — built in waves (0-4) so each phase produces something useful before moving to the next. No big bang releases.
+**Config-driven search** — search preferences (titles, locations, filters) live in `search_config.json`, committed to GitHub and documented with inline `_comment` fields. Salary floor stays private in `.env` to protect negotiating position.
 
-**Secrets management** — all API keys in `.env`, never committed to GitHub.
+**Allowlist filtering over blocklist** — rather than maintaining an ever-growing list of titles to exclude, the scraper uses a `require_title_keywords` allowlist. Any result whose title doesn't match is dropped. Eliminates noise without whack-a-mole maintenance.
+
+**Iterative waves** — built in waves (0-6) so each phase produces something useful before moving to the next. No big bang releases.
+
+**Secrets management** — API keys and salary floor in `.env`, never committed to GitHub.
 
 **Human in the loop** — Claude selects and adjusts bullets but never invents experience. Every generated resume is reviewed and edited before submission.
 
@@ -103,14 +111,18 @@ cd ai-job-search
 pip3 install anthropic requests beautifulsoup4 python-dotenv \
              pandas openpyxl python-docx
 
-# Add your API keys to .env
+# Add your API keys and salary floor to .env
 ANTHROPIC_API_KEY=your_key
 ADZUNA_APP_ID=your_id
 ADZUNA_APP_KEY=your_key
 NEWS_API_KEY=your_key
+MIN_SALARY=200000
+
+# Edit search_config.json to set your titles, locations, and filters
+# (documented inline — see _comment fields in the file)
 
 # Run the scraper
-python3 job_scraper.py --titles "IT Delivery Manager" --locations "Boston MA"
+python3 job_scraper.py
 ```
 
 ---
@@ -120,13 +132,13 @@ python3 job_scraper.py --titles "IT Delivery Manager" --locations "Boston MA"
 | Wave | Description | Status |
 |------|-------------|--------|
 | 0 | Master resume JSON database | ✅ Complete |
-| 1 | Job scraper — Adzuna API, Excel output | ✅ Complete |
+| 1 | Job scraper — Adzuna API, config-driven filters, Excel output | ✅ Complete |
 | 2 | AI resume tailoring + Word doc generation | ✅ Complete |
 | 2.5 | Company intelligence enrichment | ✅ Complete |
 | 3 | HTML job report | ✅ Complete |
 | 4 | Portfolio site — jasondarrow.com | ✅ Complete |
 | 5 | Application tracker — SQLite database | 🔜 Planned |
-| 6 | SerpAPI integration for fresher listings | 🔜 Planned |
+| 6 | Expanded search — additional job source integrations | 🔜 Planned |
 
 ---
 

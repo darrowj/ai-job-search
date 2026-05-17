@@ -1,1 +1,16 @@
+# Secrets
 .env
+
+# Job search output files — personal data, not for version control
+job_listings_*.xlsx
+job_report_*.html
+tailored_*.json
+tailored_output.json
+*.docx
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Mac junk
+.DS_Store

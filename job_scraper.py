@@ -1,16 +1,20 @@
 import requests
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
 import pandas as pd
 import argparse
+import json
+import re
 
 # Load API credentials from .env file
 load_dotenv()
 ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
 ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
+MIN_SALARY = int(os.getenv("MIN_SALARY", 0))
 
 ADZUNA_RESULTS_PER_PAGE = 50  # Adzuna allows up to 50 per page
+DEFAULT_CONFIG_FILE = "search_config.json"
 
 
 def _format_adzuna_salary(job):
@@ -57,7 +61,79 @@ def _adzuna_job_to_row_shape(job):
     }
 
 
-def search_jobs(search_term, location, num_pages=1):
+def load_search_config(filename=DEFAULT_CONFIG_FILE):
+    config_path = os.path.join(os.path.dirname(__file__), filename)
+    with open(config_path, "r") as f:
+        raw_config = json.load(f)
+    return {k: v for k, v in raw_config.items() if not k.startswith("_")}
+
+
+def _parse_adzuna_datetime(value):
+    if not value or value == "Unknown":
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _is_older_than_max_days(job, max_days_old):
+    if max_days_old is None:
+        return False
+
+    posted_at = _parse_adzuna_datetime(job.get("job_posted_at"))
+    if posted_at is None:
+        return False
+
+    if posted_at.tzinfo is None:
+        posted_at = posted_at.replace(tzinfo=timezone.utc)
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=int(max_days_old))
+    return posted_at < cutoff
+
+
+def _title_matches_required_keyword(job, require_title_keywords):
+    title = (job.get("job_title") or "").lower()
+    required = require_title_keywords or []
+    if not required:
+        return True
+
+    for keyword in required:
+        kw = str(keyword).strip().lower()
+        if not kw:
+            continue
+        if kw.replace(" ", "").isalnum():
+            if re_search_word(kw, title):
+                return True
+        elif kw in title:
+            return True
+    return False
+
+
+def re_search_word(keyword, text):
+    return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
+
+
+def filter_jobs(jobs, max_days_old=None, require_title_keywords=None):
+    counts = {
+        "max_days_old": 0,
+        "require_title_keywords": 0,
+    }
+    kept = []
+
+    for job in jobs:
+        if _is_older_than_max_days(job, max_days_old):
+            counts["max_days_old"] += 1
+            continue
+        if not _title_matches_required_keyword(job, require_title_keywords):
+            counts["require_title_keywords"] += 1
+            continue
+        kept.append(job)
+
+    return kept, counts
+
+
+def search_jobs(search_term, location, num_pages=1, min_salary=None, job_type=None):
     print(f"Searching for '{search_term}' jobs in '{location}'...")
 
     if not ADZUNA_APP_ID or not ADZUNA_APP_KEY:
@@ -77,6 +153,11 @@ def search_jobs(search_term, location, num_pages=1):
             "results_per_page": ADZUNA_RESULTS_PER_PAGE,
             "sort_by": "date",
         }
+        if min_salary:
+            params["salary_min"] = min_salary
+        if job_type == "full_time":
+            params["full_time"] = 1
+
         response = requests.get(url, headers=headers, params=params, timeout=60)
         if response.status_code != 200:
             print(f"  Adzuna API error {response.status_code}: {response.text[:200]}")
@@ -132,34 +213,58 @@ def save_to_excel(all_rows, filename="job_listings.xlsx"):
     df.to_excel(filename, index=False)
     print(f"\nSaved {len(df)} jobs to {filename}")
 
+
+def _default_output_filename():
+    return f"job_listings_{date.today().isoformat()}.xlsx"
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Search for jobs and save to Excel")
     parser.add_argument(
-        "--titles",
-        nargs="+",
-        default=["IT Delivery Manager"],
-        help='Job titles to search. Example: --titles "IT Delivery Manager" "Program Manager"'
-    )
-    parser.add_argument(
-        "--locations",
-        nargs="+",
-        default=["Boston MA"],
-        help='Locations to search. Example: --locations "Boston MA" "Worcester MA"'
-    )
-    parser.add_argument(
         "--output",
-        default="job_listings.xlsx",
+        default=_default_output_filename(),
         help="Output Excel filename"
     )
     args = parser.parse_args()
+    config = load_search_config()
+
+    titles = config.get("titles", [])
+    locations = config.get("locations", [])
+    pages = int(config.get("pages", 1))
+    max_days_old = config.get("max_days_old")
+    job_type = config.get("job_type")
+    require_title_keywords = config.get("require_title_keywords", [])
 
     # Run all combinations of titles and locations
     all_rows = []
-    for title in args.titles:
-        for location in args.locations:
-            jobs = search_jobs(title, location)
+    total_before_filters = 0
+    total_removed_by_date = 0
+    total_removed_by_title_allowlist = 0
+
+    for title in titles:
+        for location in locations:
+            jobs = search_jobs(
+                title,
+                location,
+                num_pages=pages,
+                min_salary=MIN_SALARY,
+                job_type=job_type,
+            )
+            total_before_filters += len(jobs)
+            jobs, filter_counts = filter_jobs(
+                jobs,
+                max_days_old=max_days_old,
+                require_title_keywords=require_title_keywords,
+            )
+            total_removed_by_date += filter_counts["max_days_old"]
+            total_removed_by_title_allowlist += filter_counts["require_title_keywords"]
             rows = jobs_to_rows(jobs, title, location)
             all_rows.extend(rows)
 
+    print(
+        "\nFiltering summary: "
+        f"removed {total_removed_by_date} older than {max_days_old} days; "
+        f"removed {total_removed_by_title_allowlist} by title allowlist; "
+        f"kept {len(all_rows)} of {total_before_filters} jobs before dedup."
+    )
     print(f"\nTotal listings before dedup: {len(all_rows)}")
     save_to_excel(all_rows, args.output)
