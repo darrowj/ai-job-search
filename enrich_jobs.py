@@ -4,9 +4,15 @@ import pandas as pd
 from dotenv import load_dotenv
 import anthropic
 import json
+import argparse
 from datetime import date
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
+
+try:
+    from ddgs import DDGS
+except ImportError:
+    DDGS = None
 
 load_dotenv()
 
@@ -15,16 +21,23 @@ client = anthropic.Anthropic()
 
 # ── Data fetchers ──────────────────────────────────────────────────────────
 
-def get_wikipedia_summary(company_name):
-    """Pull company overview from Wikipedia."""
-    try:
-        url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + company_name.replace(" ", "_")
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            return data.get("extract", "")
+def get_company_web_summary(company_name):
+    """Pull a company overview by combining the top 3 DuckDuckGo web results."""
+    if DDGS is None:
         return ""
-    except:
+    try:
+        with DDGS() as ddgs:
+            results = list(ddgs.text(company_name, max_results=3))
+        if not results:
+            return ""
+        lines = []
+        for r in results:
+            title = (r.get("title") or "").strip()
+            url = (r.get("href") or "").strip()
+            snippet = (r.get("body") or "").strip()
+            lines.append(f"{title}\n{url}\n{snippet}")
+        return "\n\n".join(lines)
+    except Exception:
         return ""
 
 def get_news_articles(company_name, num_articles=3):
@@ -63,13 +76,13 @@ def get_news_articles(company_name, num_articles=3):
 
 def get_company_intel(company_name, job_title, news_articles=None):
     """Use Claude to synthesize all available data into a structured brief."""
-    wiki = get_wikipedia_summary(company_name)
+    web_summary = get_company_web_summary(company_name)
     if news_articles is None:
         news_articles = get_news_articles(company_name)
     news_lines = [x["line"] for x in news_articles] if news_articles else []
     news_text = "\n".join(news_lines) if news_lines else "No recent news found."
 
-    print(f"  Wikipedia data: {'Found' if wiki else 'Not found'}")
+    print(f"  Web search data: {'Found' if web_summary else 'Not found'}")
     print(f"  News headlines: {len(news_articles)} found")
 
     prompt = f"""
@@ -80,8 +93,8 @@ to this company.
 COMPANY: {company_name}
 JOB TITLE THEY ARE CONSIDERING: {job_title}
 
-WIKIPEDIA SUMMARY:
-{wiki if wiki else "No Wikipedia data found — use general knowledge."}
+WEB SEARCH RESULTS:
+{web_summary if web_summary else "No web search data found — use general knowledge."}
 
 RECENT NEWS HEADLINES:
 {news_text}
@@ -182,7 +195,7 @@ def enrich_jobs(excel_file="job_listings.xlsx"):
 
     if interested.empty:
         print("No jobs marked as 'Interested' found.")
-        print("Open job_listings.xlsx, change Status to 'Interested' for jobs you want,  then run again.")
+        print(f"Open {excel_file}, change Status to 'Interested' for jobs you want, then run again.")
         return
 
     print(f"Found {len(interested)} jobs marked as Interested. Enriching...")
@@ -241,4 +254,12 @@ def enrich_jobs(excel_file="job_listings.xlsx"):
 # ── Run ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    enrich_jobs()
+    parser = argparse.ArgumentParser(description="Enrich Interested jobs in a listings Excel file")
+    parser.add_argument(
+        "excel_file",
+        nargs="?",
+        default="job_listings.xlsx",
+        help="Excel file to enrich (default: job_listings.xlsx)",
+    )
+    args = parser.parse_args()
+    enrich_jobs(args.excel_file)

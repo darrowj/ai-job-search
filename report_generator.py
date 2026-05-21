@@ -797,7 +797,17 @@ def generate_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build HTML report from job listings (Interested only).")
-    parser.add_argument("--input", default="job_listings.xlsx", help="Source Excel file")
+    parser.add_argument(
+        "excel_file",
+        nargs="?",
+        help="Source Excel file (default: job_listings.xlsx)",
+    )
+    parser.add_argument(
+        "--input",
+        dest="input_file",
+        default=None,
+        help="Source Excel file (legacy option; positional filename also works)",
+    )
     parser.add_argument(
         "--output",
         default=None,
@@ -809,8 +819,9 @@ def main() -> None:
         help="Skip HTTP checks on news URLs (faster; always emit clickable links, may 403 in browser)",
     )
     args = parser.parse_args()
+    input_file = args.excel_file or args.input_file or "job_listings.xlsx"
     out = generate_report(
-        args.input,
+        input_file,
         args.output,
         verify_news_urls=not args.skip_news_url_check,
     )
