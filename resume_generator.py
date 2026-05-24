@@ -4,12 +4,14 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import json
+import os
 import argparse
 
 parser = argparse.ArgumentParser(description="Generate tailored resume Word doc")
-parser.add_argument("--input", required=True, help="Tailored JSON file to use")
-parser.add_argument("--output", default="Jason_Darrow_Resume.docx", help="Output filename")
+parser.add_argument("--input", required=True, help="Tailored JSON file to use (e.g. output/tailored_Acme.json)")
+parser.add_argument("--output", default=os.path.join("personal", "Jason_Darrow_Resume.docx"), help="Output filename (default: personal/Jason_Darrow_Resume.docx)")
 args = parser.parse_args()
+os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
 
 # ── Load data ──────────────────────────────────────────────────────────────
 

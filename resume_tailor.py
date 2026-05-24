@@ -1,5 +1,6 @@
 import anthropic
 import json
+import os
 import argparse
 import requests
 from bs4 import BeautifulSoup
@@ -126,8 +127,9 @@ if __name__ == "__main__":
     # Run the tailoring
     result = tailor_resume(title, description)
 
-    # Save output named by company
-    output_file = f"tailored_{args.company.replace(' ', '_')}.json"
+    # Save output named by company into output/
+    os.makedirs("output", exist_ok=True)
+    output_file = os.path.join("output", f"tailored_{args.company.replace(' ', '_')}.json")
     with open(output_file, "w") as f:
         json.dump(result, f, indent=2)
 

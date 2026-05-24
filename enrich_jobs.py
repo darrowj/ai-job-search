@@ -186,7 +186,7 @@ def apply_formatting(excel_file):
 
 # ── Main enrichment loop ───────────────────────────────────────────────────
 
-def enrich_jobs(excel_file="job_listings.xlsx"):
+def enrich_jobs(excel_file=os.path.join("output", "job_listings.xlsx")):
     print(f"Loading {excel_file}...")
     df = pd.read_excel(excel_file)
 
@@ -258,8 +258,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "excel_file",
         nargs="?",
-        default="job_listings.xlsx",
-        help="Excel file to enrich (default: job_listings.xlsx)",
+        default=os.path.join("output", "job_listings.xlsx"),
+        help="Excel file to enrich (default: output/job_listings.xlsx)",
     )
     args = parser.parse_args()
     enrich_jobs(args.excel_file)

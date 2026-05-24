@@ -1,12 +1,14 @@
 # Secrets
 .env
 
-# Job search output files — personal data, not for version control
-job_listings_*.xlsx
-job_report_*.html
-tailored_*.json
-tailored_output.json
-*.docx
+# Generated output files — not for version control
+output/
+
+# Personal documents — resumes, prep sheets, private docs
+personal/
+
+# Personal context / AI session files
+context/
 
 # Python cache
 __pycache__/

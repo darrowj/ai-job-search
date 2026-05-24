@@ -3,6 +3,7 @@
 
 import argparse
 import html
+import os
 import re
 import shlex
 from datetime import date
@@ -766,9 +767,10 @@ def generate_report(
 ) -> Path:
     excel_path = Path(excel_path)
     if output_path is None:
-        output_path = Path(f"job_report_{date.today().isoformat()}.html")
+        output_path = Path("output") / f"job_report_{date.today().isoformat()}.html"
     else:
         output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     df = _ensure_columns(pd.read_excel(excel_path))
 
@@ -819,7 +821,7 @@ def main() -> None:
         help="Skip HTTP checks on news URLs (faster; always emit clickable links, may 403 in browser)",
     )
     args = parser.parse_args()
-    input_file = args.excel_file or args.input_file or "job_listings.xlsx"
+    input_file = args.excel_file or args.input_file or os.path.join("output", "job_listings.xlsx")
     out = generate_report(
         input_file,
         args.output,

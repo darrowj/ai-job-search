@@ -198,6 +198,7 @@ def save_to_excel(all_rows, filename="job_listings.xlsx"):
         print("No jobs to save.")
         return
 
+    os.makedirs(os.path.dirname(filename) or ".", exist_ok=True)
     df = pd.DataFrame(all_rows)
 
     # Remove duplicate listings by URL
@@ -215,7 +216,7 @@ def save_to_excel(all_rows, filename="job_listings.xlsx"):
 
 
 def _default_output_filename():
-    return f"job_listings_{date.today().isoformat()}.xlsx"
+    return os.path.join("output", f"job_listings_{date.today().isoformat()}.xlsx")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Search for jobs and save to Excel")
