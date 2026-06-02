@@ -525,7 +525,7 @@
 
   <!-- PROJECT -->
   <section id="project">
-    <p class="section-tag">Waves 0 – 4 Complete</p>
+    <p class="section-tag">Waves 0 – 5 Complete</p>
     <h2 class="section-title">AI Job Search System</h2>
     <div class="project-grid">
       <div class="project-main">
@@ -533,18 +533,22 @@
         <p class="project-desc">
           A personal AI agent that finds job listings, scores them against
           my experience, tailors my resume for each role using the Claude API,
-          and generates a submission-ready Word document — all from the command line.
-          Built to solve my own job search problem while learning AI development.
+          and generates a submission-ready Word document. It runs from a
+          Streamlit dashboard or the command line. Built to solve my own job
+          search problem while learning AI development.
         </p>
         <p class="project-desc">
           The system scrapes multiple job boards across multiple locations,
           enriches listings with company intelligence, filters by salary and relevance
           using a config-driven allowlist, and uses a 53-bullet master resume database
-          to select the most relevant content for each role.
+          to select the most relevant content for each role. A Streamlit dashboard
+          ties the whole pipeline together — each stage runs from a button, with
+          live logs streamed into the browser.
         </p>
         <div class="project-stack">
           <span class="tag">Python 3</span>
           <span class="tag">Claude API</span>
+          <span class="tag">Streamlit</span>
           <span class="tag">Adzuna API</span>
           <span class="tag">NewsAPI</span>
           <span class="tag">python-docx</span>
@@ -559,15 +563,18 @@
       </div>
       <div class="project-sidebar">
         <div class="terminal">
-          <span class="terminal-line terminal-comment"># Configure search in search_config.json</span>
-          <span class="terminal-line terminal-comment"># titles, locations, filters — all in one place</span>
+          <span class="terminal-line terminal-comment"># Launch the dashboard — runs the whole pipeline</span>
+          <span class="terminal-line">
+            <span class="terminal-prompt">$ </span>streamlit run dashboard.py
+          </span>
+          <span class="terminal-line" style="color: #a8e6a3;">✓ Control panel live at localhost:8501</span>
           <br>
-          <span class="terminal-line terminal-comment"># Run the scraper</span>
+          <span class="terminal-line terminal-comment"># ...or run each stage from the command line</span>
           <span class="terminal-line">
             <span class="terminal-prompt">$ </span>python3 job_scraper.py
           </span>
           <span class="terminal-line" style="color: #a8e6a3;">✓ 42 jobs found · 18 passed filters</span>
-          <span class="terminal-line" style="color: #a8e6a3;">✓ Saved: job_listings_2026-05-17.xlsx</span>
+          <span class="terminal-line" style="color: #a8e6a3;">✓ Saved: job_listings.xlsx</span>
           <br>
           <span class="terminal-line terminal-comment"># Tailor resume to a specific role</span>
           <span class="terminal-line">
@@ -632,12 +639,18 @@
       </div>
       <div class="wave-card">
         <div class="wave-number">5</div>
-        <div class="wave-title">Application Tracker</div>
-        <div class="wave-desc">SQLite database to track applications from submission through offer. Dashboard to monitor pipeline status.</div>
-        <span class="wave-status status-next">Planned</span>
+        <div class="wave-title">Streamlit Dashboard</div>
+        <div class="wave-desc">Browser control panel for the whole pipeline. Each stage runs from a button with live logs; review and tailor without touching the terminal.</div>
+        <span class="wave-status status-done">Complete</span>
       </div>
       <div class="wave-card">
         <div class="wave-number">6</div>
+        <div class="wave-title">Application Tracker</div>
+        <div class="wave-desc">SQLite database to track applications from submission through offer, surfaced in the dashboard.</div>
+        <span class="wave-status status-next">Planned</span>
+      </div>
+      <div class="wave-card">
+        <div class="wave-number">7</div>
         <div class="wave-title">Expanded Search</div>
         <div class="wave-desc">Additional job source integrations for broader, fresher listings across more platforms.</div>
         <span class="wave-status status-next">Planned</span>
