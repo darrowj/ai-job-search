@@ -20,6 +20,34 @@ Built as a hands-on learning project to develop real AI engineering skills while
 
 ## The workflow
 
+There are two ways to run the pipeline: the **dashboard** (recommended) or the
+**command line**. Both call the same scripts and produce the same files.
+
+### Recommended: the dashboard
+
+```
+1. Edit search_config.json
+   → set titles, locations, filters, salary floor (salary set privately in .env)
+
+2. streamlit run dashboard.py
+   → opens the control panel in your browser
+
+3. Work top to bottom through the tabs:
+   Tab 1 Scrape   → run the scraper, watch the live log
+   Tab 2 Review   → mark roles "Interested" right in an editable table
+   Tab 3 Enrich   → pull company intel, read briefs, generate the HTML report
+   Tab 4 Tailor   → pick a role, tailor the resume, generate the .docx
+   Tab 5 Status   → see per-company enrichment / tailored / resume state
+
+4. Review, edit, export to PDF, submit
+```
+
+The dashboard is the human-in-the-loop front door — every button still runs the
+scripts below, with their output streamed live into the page. See the
+[Dashboard](#dashboard) section for tab details.
+
+### Alternative: the command line
+
 ```
 1. Edit search_config.json
    → set titles, locations, filters, salary floor (salary set privately in .env)
@@ -32,7 +60,7 @@ Built as a hands-on learning project to develop real AI engineering skills while
 
 4. python3 enrich_jobs.py
    → pulls company intel for Interested rows
-   → generates job_report_2026-05-17.html
+   → generates the HTML report
 
 5. Open HTML report in browser
    → read company briefs
@@ -41,9 +69,9 @@ Built as a hands-on learning project to develop real AI engineering skills while
 6. python3 resume_tailor.py --company "Fidelity" \
                              --title "Technical Project Delivery Manager" \
                              --url "https://linkedin.com/jobs/..."
-   → tailored_Fidelity.json (match score, selected bullets)
+   → output/tailored_Fidelity.json (match score, selected bullets)
 
-7. python3 resume_generator.py --input tailored_Fidelity.json
+7. python3 resume_generator.py --input output/tailored_Fidelity.json
    → Jason_Darrow_Resume.docx
 
 8. Review, edit, export to PDF, submit
@@ -72,6 +100,7 @@ Built as a hands-on learning project to develop real AI engineering skills while
 ## Project files
 
 ```
+dashboard.py            Streamlit control panel — run the whole pipeline from the browser
 job_scraper.py          Search job boards, output to Excel
 search_config.json      Search preferences — titles, locations, filters (committed)
 enrich_jobs.py          Enrich Interested listings with company intel
@@ -136,7 +165,7 @@ cd ai-job-search
 
 # Install dependencies
 pip3 install anthropic requests beautifulsoup4 python-dotenv \
-             pandas openpyxl python-docx
+             pandas openpyxl python-docx streamlit
 
 # Add your API keys and salary floor to .env
 ANTHROPIC_API_KEY=your_key
@@ -164,8 +193,9 @@ python3 job_scraper.py
 | 2.5 | Company intelligence enrichment | ✅ Complete |
 | 3 | HTML job report | ✅ Complete |
 | 4 | Portfolio site — jasondarrow.com | ✅ Complete |
-| 5 | Application tracker — SQLite database | 🔜 Planned |
-| 6 | Expanded search — additional job source integrations | 🔜 Planned |
+| 5 | Streamlit dashboard — run the full pipeline from the browser | ✅ Complete |
+| 6 | Application tracker — SQLite database | 🔜 Planned |
+| 7 | Expanded search — additional job source integrations | 🔜 Planned |
 
 ---
 
