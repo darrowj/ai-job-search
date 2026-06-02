@@ -9,7 +9,7 @@ Built as a hands-on learning project to develop real AI engineering skills while
 
 ## What it does
 
-- **Scrapes job boards** across multiple titles and locations via the Adzuna API — outputs to a dated Excel file
+- **Scrapes job boards** across multiple titles and locations via the Adzuna API — outputs to `output/job_listings.xlsx` (with dated archive snapshots)
 - **Enriches listings** with company intelligence — industry, size, stability, growth trend, and recent news via Wikipedia and NewsAPI
 - **Generates an HTML report** of shortlisted jobs with company briefs and one-click resume tailor commands
 - **Tailors resumes** using the Claude API — reads a real job posting URL, selects the best matching bullets from a 53-bullet master resume database, rewrites the summary to match
@@ -25,7 +25,8 @@ Built as a hands-on learning project to develop real AI engineering skills while
    → set titles, locations, filters, salary floor (salary set privately in .env)
 
 2. python3 job_scraper.py
-   → job_listings_2026-05-17.xlsx (filtered, deduped, dated)
+   → output/job_listings.xlsx (canonical, filtered, deduped)
+   → output/archive/job_listings_YYYY-MM-DD.xlsx (dated snapshot)
 
 3. Open Excel → mark interesting roles as "Interested"
 
@@ -97,6 +98,32 @@ index.html              Portfolio site source
 **Secrets management** — API keys and salary floor in `.env`, never committed to GitHub.
 
 **Human in the loop** — Claude selects and adjusts bullets but never invents experience. Every generated resume is reviewed and edited before submission.
+
+---
+
+## Dashboard
+
+A Streamlit app (`dashboard.py`) wraps the pipeline so each stage runs from a button instead of a terminal. It is the human-in-the-loop control panel — every action still calls the same scripts under the hood, with stdout streamed live into the page so you can watch the work happen.
+
+**Launch:**
+
+```bash
+streamlit run dashboard.py
+```
+
+**Tabs:**
+
+| Tab | What it does |
+|-----|---------------|
+| 1. Scrape | Runs `job_scraper.py` (writes canonical `output/job_listings.xlsx` + archive snapshot) |
+| 2. Review | Edits the `Status` column in-place (`Interested` / `Skip`), saves back to Excel |
+| 3. Enrich | Counts Interested jobs, runs `enrich_jobs.py`, renders company briefs, generates the HTML report |
+| 4. Tailor | Picks one Interested role, runs `resume_tailor.py` (URL or pasted JD), shows match score and bullets, generates a per-company `.docx` |
+| 5. Status | Read-only tracker showing per-company enrichment / tailored / resume state from files on disk |
+
+A status panel at the top shows total jobs, # Interested, # enriched, # tailored resumes, and the canonical file's last-modified time.
+
+**CLI vs dashboard:** `python3 job_scraper.py` and the dashboard **Run Scraper** button both write the same canonical file. Dated history lives under `output/archive/` only.
 
 ---
 

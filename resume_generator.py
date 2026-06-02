@@ -12,6 +12,7 @@ parser.add_argument("--input", required=True, help="Tailored JSON file to use (e
 parser.add_argument("--output", default=os.path.join("personal", "Jason_Darrow_Resume.docx"), help="Output filename (default: personal/Jason_Darrow_Resume.docx)")
 args = parser.parse_args()
 os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
+print(f"Generating Word doc from: {args.input}", flush=True)
 
 # ── Load data ──────────────────────────────────────────────────────────────
 
@@ -324,4 +325,4 @@ for cert in [
 # ── Save ──────────────────────────────────────────────────────────────────
 
 doc.save(args.output)
-print(f"Resume saved: {args.output}")
+print(f"Resume saved: {args.output}", flush=True)

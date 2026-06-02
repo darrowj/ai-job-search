@@ -2,6 +2,7 @@ import requests
 from datetime import date, datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
+import shutil
 import pandas as pd
 import argparse
 import json
@@ -134,10 +135,10 @@ def filter_jobs(jobs, max_days_old=None, require_title_keywords=None):
 
 
 def search_jobs(search_term, location, num_pages=1, min_salary=None, job_type=None):
-    print(f"Searching for '{search_term}' jobs in '{location}'...")
+    print(f"Searching for '{search_term}' jobs in '{location}'...", flush=True)
 
     if not ADZUNA_APP_ID or not ADZUNA_APP_KEY:
-        print("  Missing ADZUNA_APP_ID or ADZUNA_APP_KEY in environment (.env).")
+        print("  Missing ADZUNA_APP_ID or ADZUNA_APP_KEY in environment (.env).", flush=True)
         return []
 
     headers = {"Accept": "application/json"}
@@ -160,7 +161,7 @@ def search_jobs(search_term, location, num_pages=1, min_salary=None, job_type=No
 
         response = requests.get(url, headers=headers, params=params, timeout=60)
         if response.status_code != 200:
-            print(f"  Adzuna API error {response.status_code}: {response.text[:200]}")
+            print(f"  Adzuna API error {response.status_code}: {response.text[:200]}", flush=True)
             break
         payload = response.json()
         batch = payload.get("results") or []
@@ -169,7 +170,7 @@ def search_jobs(search_term, location, num_pages=1, min_salary=None, job_type=No
             break
 
     jobs = [_adzuna_job_to_row_shape(j) for j in all_raw]
-    print(f"  Found {len(jobs)} jobs.")
+    print(f"  Found {len(jobs)} jobs.", flush=True)
     return jobs
 
 def jobs_to_rows(jobs, search_term, location):
@@ -195,7 +196,7 @@ def jobs_to_rows(jobs, search_term, location):
 
 def save_to_excel(all_rows, filename="job_listings.xlsx"):
     if not all_rows:
-        print("No jobs to save.")
+        print("No jobs to save.", flush=True)
         return
 
     os.makedirs(os.path.dirname(filename) or ".", exist_ok=True)
@@ -206,17 +207,30 @@ def save_to_excel(all_rows, filename="job_listings.xlsx"):
     df = df.drop_duplicates(subset=["Apply URL"])
     after = len(df)
     if before != after:
-        print(f"Removed {before - after} duplicate listings.")
+        print(f"Removed {before - after} duplicate listings.", flush=True)
 
     # Sort by company name
     df = df.sort_values("Company")
 
     df.to_excel(filename, index=False)
-    print(f"\nSaved {len(df)} jobs to {filename}")
+    print(f"\nSaved {len(df)} jobs to {filename}", flush=True)
 
 
 def _default_output_filename():
-    return os.path.join("output", f"job_listings_{date.today().isoformat()}.xlsx")
+    return os.path.join("output", "job_listings.xlsx")
+
+
+def _archive_copy(canonical_path: str) -> str:
+    """Keep a dated snapshot under output/archive/ for scrape history."""
+    archive_dir = os.path.join("output", "archive")
+    os.makedirs(archive_dir, exist_ok=True)
+    archive_path = os.path.join(
+        archive_dir, f"job_listings_{date.today().isoformat()}.xlsx"
+    )
+    shutil.copyfile(canonical_path, archive_path)
+    print(f"Archived copy: {archive_path}", flush=True)
+    return archive_path
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Search for jobs and save to Excel")
@@ -265,7 +279,11 @@ if __name__ == "__main__":
         "\nFiltering summary: "
         f"removed {total_removed_by_date} older than {max_days_old} days; "
         f"removed {total_removed_by_title_allowlist} by title allowlist; "
-        f"kept {len(all_rows)} of {total_before_filters} jobs before dedup."
+        f"kept {len(all_rows)} of {total_before_filters} jobs before dedup.",
+        flush=True,
     )
-    print(f"\nTotal listings before dedup: {len(all_rows)}")
+    print(f"\nTotal listings before dedup: {len(all_rows)}", flush=True)
     save_to_excel(all_rows, args.output)
+    default_out = _default_output_filename()
+    if all_rows and os.path.normpath(args.output) == os.path.normpath(default_out):
+        _archive_copy(args.output)

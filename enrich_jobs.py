@@ -52,11 +52,11 @@ def get_news_articles(company_name, num_articles=3):
             "apiKey": NEWS_API_KEY
         }
         response = requests.get(url, params=params, timeout=10)
-        print(f"  News API status: {response.status_code}")
+        print(f"  News API status: {response.status_code}", flush=True)
 
         if response.status_code == 200:
             articles = response.json().get("articles", [])
-            print(f"  Articles returned: {len(articles)}")
+            print(f"  Articles returned: {len(articles)}", flush=True)
             out = []
             for a in articles:
                 title = a.get("title", "") or ""
@@ -67,10 +67,10 @@ def get_news_articles(company_name, num_articles=3):
                 out.append({"line": line, "url": article_url})
             return out
         else:
-            print(f"  News API error: {response.json().get('message', 'Unknown error')}")
+            print(f"  News API error: {response.json().get('message', 'Unknown error')}", flush=True)
         return []
     except Exception as e:
-        print(f"  News fetch error: {e}")
+        print(f"  News fetch error: {e}", flush=True)
         return []
 
 
@@ -82,8 +82,8 @@ def get_company_intel(company_name, job_title, news_articles=None):
     news_lines = [x["line"] for x in news_articles] if news_articles else []
     news_text = "\n".join(news_lines) if news_lines else "No recent news found."
 
-    print(f"  Web search data: {'Found' if web_summary else 'Not found'}")
-    print(f"  News headlines: {len(news_articles)} found")
+    print(f"  Web search data: {'Found' if web_summary else 'Not found'}", flush=True)
+    print(f"  News headlines: {len(news_articles)} found", flush=True)
 
     prompt = f"""
 You are a business intelligence analyst. Based on the information below,
@@ -130,10 +130,10 @@ Return ONLY a JSON object in this exact format — no other text:
 
 def _normalize_founded_value(raw) -> str:
     """Avoid Excel float year artifacts when saving (e.g. store 1995 not 1995.0)."""
-    if raw is None:
+    if raw is None or (isinstance(raw, float) and pd.isna(raw)):
         return ""
     s = str(raw).strip()
-    if not s:
+    if not s or s.lower() == "nan":
         return ""
     try:
         f = float(s.replace(",", ""))
@@ -142,6 +142,28 @@ def _normalize_founded_value(raw) -> str:
     except ValueError:
         pass
     return s
+
+
+ENRICHMENT_TEXT_COLUMNS = [
+    "Industry", "HQ Location", "Company Size", "Founded",
+    "Market Cap", "Description", "Stability", "Growth Trend",
+    "News 1", "News 2", "News 3",
+    "News 1 URL", "News 2 URL", "News 3 URL",
+    "Recommendation", "Enriched Date",
+]
+
+
+def _prepare_enrichment_columns(df: pd.DataFrame) -> None:
+    """Excel often loads Founded as float64 (1995.0). Coerce text columns to object
+    so re-enrichment can assign string years like '1995' without dtype errors."""
+    for col in ENRICHMENT_TEXT_COLUMNS:
+        if col not in df.columns:
+            continue
+        if col == "Founded":
+            df[col] = df[col].apply(_normalize_founded_value)
+        else:
+            df[col] = df[col].fillna("").astype(str)
+        df[col] = df[col].astype(object)
 
 # ── Text wrap columns in Excel ─────────────────────────────────────────────
 
@@ -187,18 +209,18 @@ def apply_formatting(excel_file):
 # ── Main enrichment loop ───────────────────────────────────────────────────
 
 def enrich_jobs(excel_file=os.path.join("output", "job_listings.xlsx")):
-    print(f"Loading {excel_file}...")
+    print(f"Loading {excel_file}...", flush=True)
     df = pd.read_excel(excel_file)
 
     # Find rows marked as Interested
     interested = df[df["Status"].str.strip().str.lower() == "interested"]
 
     if interested.empty:
-        print("No jobs marked as 'Interested' found.")
-        print(f"Open {excel_file}, change Status to 'Interested' for jobs you want, then run again.")
+        print("No jobs marked as 'Interested' found.", flush=True)
+        print(f"Open {excel_file}, change Status to 'Interested' for jobs you want, then run again.", flush=True)
         return
 
-    print(f"Found {len(interested)} jobs marked as Interested. Enriching...")
+    print(f"Found {len(interested)} jobs marked as Interested. Enriching...", flush=True)
 
     # Add new columns if they don't exist
     new_cols = ["Industry", "HQ Location", "Company Size", "Founded",
@@ -210,11 +232,13 @@ def enrich_jobs(excel_file=os.path.join("output", "job_listings.xlsx")):
         if col not in df.columns:
             df[col] = ""
 
+    _prepare_enrichment_columns(df)
+
     # Enrich each interested row
     for idx, row in interested.iterrows():
         company = row["Company"]
         title = row["Title"]
-        print(f"\nResearching: {company}...")
+        print(f"\nEnriching {company} via DuckDuckGo / NewsAPI...", flush=True)
 
         try:
             news_articles = get_news_articles(company)
@@ -238,18 +262,18 @@ def enrich_jobs(excel_file=os.path.join("output", "job_listings.xlsx")):
             df.at[idx, "Recommendation"] = intel.get("recommendation", "")
             df.at[idx, "Enriched Date"]  = str(date.today())
 
-            print(f"  ✓ Done — {intel.get('stability')} / {intel.get('growth_trend')}")
+            print(f"  ✓ Done — {intel.get('stability')} / {intel.get('growth_trend')}", flush=True)
 
         except Exception as e:
-            print(f"  ✗ Error enriching {company}: {e}")
+            print(f"  ✗ Error enriching {company}: {e}", flush=True)
 
     # Save to Excel
     df.to_excel(excel_file, index=False)
-    print(f"\nData saved to {excel_file}")
+    print(f"\nData saved to {excel_file}", flush=True)
 
     # Apply formatting
     apply_formatting(excel_file)
-    print(f"Enrichment complete. Open {excel_file} to review.")
+    print(f"Enrichment complete. Open {excel_file} to review.", flush=True)
 
 # ── Run ───────────────────────────────────────────────────────────────────
 

@@ -16,7 +16,7 @@ with open("master_resume.json", "r") as f:
 # ── Fetch job description from URL ─────────────────────────────────────────
 
 def fetch_job_description(url):
-    print(f"Fetching job description from: {url}")
+    print(f"Fetching job description from: {url}", flush=True)
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
     }
@@ -34,17 +34,17 @@ def fetch_job_description(url):
         # Trim to reasonable size for the API
         text = text[:4000]
 
-        print(f"Fetched {len(text)} characters of job description.")
+        print(f"Fetched {len(text)} characters of job description.", flush=True)
         return text
 
     except Exception as e:
-        print(f"Error fetching URL: {e}")
+        print(f"Error fetching URL: {e}", flush=True)
         return None
 
 # ── Tailor resume using Claude API ────────────────────────────────────────
 
 def tailor_resume(job_title, job_description):
-    print(f"Tailoring resume for: {job_title}...")
+    print(f"Tailoring resume for: {job_title}...", flush=True)
 
     client = anthropic.Anthropic()
 
@@ -133,7 +133,8 @@ if __name__ == "__main__":
     with open(output_file, "w") as f:
         json.dump(result, f, indent=2)
 
-    print(f"\nTailoring complete.")
-    print(f"Match score:  {result['match_score']} / 100")
-    print(f"Key skills:   {', '.join(result['key_skills'])}")
-    print(f"Saved to:     {output_file}")
+    print(f"\nTailoring complete.", flush=True)
+    print(f"Match score:  {result['match_score']} / 100", flush=True)
+    print(f"Key skills:   {', '.join(result['key_skills'])}", flush=True)
+    print(f"Bullets selected: {len(result.get('selected_bullets', []))}", flush=True)
+    print(f"Saved to:     {output_file}", flush=True)
