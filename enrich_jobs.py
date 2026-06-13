@@ -13,6 +13,7 @@ try:
     from ddgs import DDGS
 except ImportError:
     DDGS = None
+    print("⚠ ddgs not installed. Run: pip install ddgs")
 
 load_dotenv()
 
@@ -26,8 +27,7 @@ def get_company_web_summary(company_name):
     if DDGS is None:
         return ""
     try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(company_name, max_results=3))
+        results = list(DDGS().text(company_name, max_results=3))
         if not results:
             return ""
         lines = []

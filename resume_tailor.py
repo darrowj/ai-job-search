@@ -24,6 +24,12 @@ def fetch_job_description(url):
     }
     try:
         response = requests.get(url, headers=headers, timeout=10)
+
+        # Non-200 means access denied, redirect wall, or other block
+        if response.status_code != 200:
+            print(f"⚠ HTTP {response.status_code} returned — fetch blocked.", flush=True)
+            return None
+
         soup = BeautifulSoup(response.text, "html.parser")
 
         # Remove noise
