@@ -13,7 +13,7 @@
       {
         "id": "delivery-mgr",
         "target": "IT Delivery Manager / Program Manager",
-        "text": "Progressive IT Delivery Leader with 15+ years of experience managing strategic programs and cross-functional teams in complex, matrixed environments. Proven track record of driving execution across Technology and Business units, managing vendor and FTE resources both onshore and offshore, and serving as the face of IT for senior stakeholders. Deep financial services background spanning 17+ years, with hands-on experience across Agile, Waterfall, and iterative delivery methodologies. PMP and CSM certified with a consistent record of process improvement and on-time program delivery."
+        "text": "IT Delivery Manager with experience leading multi-million-dollar technology programs within the financial services industry.  Deliver complex, cross-functional initiatives across 30+ application groups, managing budgets from $250K to $3M, and directing high-performing onshore and offshore teams.  Skilled at translating business strategy into executable technology solutions, driving projects from concept through implementation.  Hands-on experience developing AI-powered solutions using Python, Claude, and Grok to automate, enhance decision-making, and leverage emerging technologies to drive business value."
       },
       {
         "id": "ai-transformation",
@@ -37,8 +37,8 @@
         "id": "exp001",
         "company": "Voya Financial",
         "title": "IT Delivery Manager",
-        "dates": "October 2018 – Present",
-        "role_description": "Oversees delivery and execution of business prioritized IT programs and projects. Responsible for providing guidance and structure to project teams comprised of vendor and FTE resources, both onshore and offshore.",
+        "dates": "October 2018 – June 2026",
+        "role_description": "Delivered business-prioritized IT programs across the Retirement Services and Wealth Solutions portfolios.  Led blended vendor and FTE teams, onshore and offshore, from intake through production deployment.  Coordinated delivery across 30+ cross-functional application teams (development, QA, business, architecture, and vendor partners) in a matrixed environment.  Reported to Associate Vice President.",
         "bullets": [
           { "id": "b001", "text": "IT Delivery Manager responsible for the Managed Accounts program — worked with MorningStar and Future Capital to provide investment advice to plan participants.", "tags": ["vendor-management", "retirement", "financial-services", "program-management"], "strength": 8 },
           { "id": "b002", "text": "Managed projects working directly with vendors to provide web functionality to retirement advisors and plan participants.", "tags": ["vendor-management", "web", "retirement", "delivery"], "strength": 7 },
@@ -68,7 +68,10 @@
           { "id": "b048", "text": "Led budget forecasting and estimation for new project proposals using application-team input and historical delivery data, advancing initiatives through IT Intake with funding ranging from $250K to $3M.", "tags": ["budget", "forecasting", "governance", "planning", "program-management"], "strength": 9 },
           { "id": "b049", "text": "De-risked a complex release by forcing clear Day 1 vs. Day 2 scope decisions and formalizing the plan into funded change controls, allowing staged delivery instead of an all-or-nothing release.", "tags": ["scope-management", "risk-management", "change-management", "delivery", "planning"], "strength": 9 },
           { "id": "b050", "text": "Shipped 8+ Retirement and Wealth Solutions initiatives in a single year, all on time and on budget, despite shifting timelines and heavy vendor dependencies.", "tags": ["delivery", "volume", "retirement", "vendor-management", "high-impact"], "strength": 9 },
-          { "id": "b051", "text": "Coordinated delivery across 30+ cross-functional application teams (development, QA, business, architecture, and vendor partners) in a matrixed environment.", "tags": ["matrixed", "coordination", "team-leadership", "delivery", "stakeholder-management"], "strength": 9 }
+          { "id": "b051", "text": "Coordinated delivery across 30+ cross-functional application teams (development, QA, business, architecture, and vendor partners) in a matrixed environment.", "tags": ["matrixed", "coordination", "team-leadership", "delivery", "stakeholder-management"], "strength": 9 },
+          { "id": "b052", "text": "Directed end-to-end delivery through technical governance and compliance frameworks (TPRA, SaaS, IT governance), managing vendor dependencies, CMDB and change management processes, CAB approvals, and seamless go-live execution.", "tags": ["governance", "compliance", "change-management", "vendor-management", "release-management"], "strength": 9, "notes": "Professional writer rewrite of b046 — stronger action verb and cleaner framing" },
+          { "id": "b053", "text": "Mitigated complex release risk by defining Day 1 vs. Day 2 scope and funding change controls, enabling a structured phased rollout instead of an all-or-nothing release approach.", "tags": ["scope-management", "risk-management", "change-management", "delivery", "planning"], "strength": 9, "notes": "Professional writer rewrite of b049 — mitigated vs de-risked" },
+          { "id": "b054", "text": "Executed 8+ Retirement and Wealth Solutions initiatives in a single year, delivering projects on time and within budget while navigating evolving requirements and heavy vendor coordination.", "tags": ["delivery", "volume", "retirement", "vendor-management", "high-impact"], "strength": 9, "notes": "Professional writer rewrite of b050 — executed vs shipped" }
         ]
       },
       {
@@ -86,7 +89,8 @@
           { "id": "b028", "text": "Functioned as Application Manager for the Client and Account Closure Orchestration portal supporting eight lines of business and five regulatory groups within the firm.", "tags": ["application-management", "regulatory", "enterprise", "multi-LOB", "compliance"], "strength": 10 },
           { "id": "b029", "text": "Worked with Jira to facilitate the Agile process across projects, managing backlogs, sprints, and delivery tracking.", "tags": ["agile", "jira", "scrum", "tools", "delivery"], "strength": 7 },
           { "id": "b030", "text": "Supported all interactions with enterprise infrastructure, enterprise architecture, and Level 1 and 2 support teams across applications.", "tags": ["enterprise-architecture", "infrastructure", "support", "coordination"], "strength": 7 },
-          { "id": "b031", "text": "Application Manager that helped implement and support the Metadata Management Portal for data governance and regulatory compliance.", "tags": ["data-management", "metadata", "regulatory-compliance", "application-management"], "strength": 8 }
+          { "id": "b031", "text": "Application Manager that helped implement and support the Metadata Management Portal for data governance and regulatory compliance.", "tags": ["data-management", "metadata", "regulatory-compliance", "application-management"], "strength": 8 },
+          { "id": "b055", "text": "Supported Data Management applications for regulatory compliance using Agile methodologies, providing critical metadata insights that helped business leaders identify redundant data capture and storage processes, improve data quality, and enhance governance across commercial banking operations.", "tags": ["data-management", "metadata", "regulatory-compliance", "agile", "governance", "commercial-banking"], "strength": 9, "notes": "Professional writer rewrite of b031 — adds business impact, Agile context, and commercial banking specificity" }
         ]
       },
       {
@@ -146,6 +150,10 @@
         "url": "jasondarrow.com",
         "github": "github.com/darrowj/ai-job-search",
         "description": "Built an AI-powered job search agent that scrapes job boards, filters by criteria, tailors resumes and cover letters using the Claude API, and tracks application progress through a full pipeline.",
+        "bullets": [
+          "Built end-to-end AI-powered job search and resume personalization system that scrapes job postings via the Adzuna API, enriches company and role intelligence, and dynamically tailors resume using the Claude AI by selecting optimal content from a scored 53-bullet master resume library.",
+          "Engineered for accuracy, trust, and maintainability through configuration files, secure variables management via .env file, and a human-in-the-loop control layer using AI-assistance without hallucination or fabrication of experience."
+        ],
         "tags": ["python", "llm", "claude-api", "automation", "ai", "agents"],
         "status": "In Progress - Wave 2 Complete"
       }
@@ -177,9 +185,9 @@
       "bjj_notes": "Brazilian Jiu-Jitsu Black Belt — reflects long-term discipline, resilience, and commitment to continuous improvement"
     },
     "metadata": {
-      "last_updated": "2026-05-13",
-      "version": 2,
-      "source_resume": "Jason_Darrow_Resume_v11.docx",
+      "last_updated": "2026-06-13",
+      "version": 3,
+      "source_resume": "Darrow Jason FINAL resume.docx",
       "target_roles": ["IT Delivery Manager", "Program Manager", "Technical Program Manager", "AI Operations Manager", "Digital Transformation Lead", "Service Delivery Manager"]
     }
   }

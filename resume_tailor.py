@@ -52,10 +52,13 @@ def tailor_resume(job_title, job_description):
 You are an expert resume writer. I will give you a master resume in JSON 
 format and a job description. Your job is to:
 
-1. Read the job description carefully and identify the top 5-6 required 
+1. Read the job description carefully and identify the top 5-6 required
    skills and experiences
-2. Select the most relevant bullets from the master resume that match
-3. Lightly adjust the wording of bullets to mirror the job description 
+2. Select the most relevant bullets from the master resume that match.
+   - Voya Financial (most recent role): select exactly 5 bullets
+   - Bank of America roles: select 2-3 bullets total across all BoA titles
+   - Do not include bullets from older roles (Click2Learn, etc.)
+3. Lightly adjust the wording of bullets to mirror the job description
    language — but never invent experience or change facts
 4. Return a tailored resume summary and the selected bullets in JSON format
 

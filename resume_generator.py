@@ -1,328 +1,217 @@
-from docx import Document
-from docx.shared import Pt, RGBColor, Inches, Twips
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+"""
+resume_generator.py
+
+Opens "Darrow Jason FINAL resume.docx" as a formatting template and replaces
+only the dynamic sections (summary + Voya bullets) with content from the
+tailored JSON produced by resume_tailor.py.  All margins, fonts, colors,
+borders, and static sections are inherited from the template unchanged.
+
+Usage:
+    python3 resume_generator.py --input output/tailored_Acme.json
+    python3 resume_generator.py --input output/tailored_Acme.json --output personal/Acme_Resume.docx
+"""
+
+import argparse
+import copy
 import json
 import os
-import argparse
+
+from docx import Document
+from docx.oxml.ns import qn
+
+# ── Args ───────────────────────────────────────────────────────────────────
 
 parser = argparse.ArgumentParser(description="Generate tailored resume Word doc")
-parser.add_argument("--input", required=True, help="Tailored JSON file to use (e.g. output/tailored_Acme.json)")
-parser.add_argument("--output", default=os.path.join("personal", "Jason_Darrow_Resume.docx"), help="Output filename (default: personal/Jason_Darrow_Resume.docx)")
+parser.add_argument(
+    "--input",
+    required=True,
+    help="Tailored JSON file (e.g. output/tailored_Acme.json)",
+)
+parser.add_argument(
+    "--output",
+    default=os.path.join("personal", "Jason_Darrow_Resume.docx"),
+    help="Output filename (default: personal/Jason_Darrow_Resume.docx)",
+)
+parser.add_argument(
+    "--template",
+    default=os.path.join("personal", "Darrow Jason FINAL resume.docx"),
+    help="Template .docx to use as the formatting base",
+)
 args = parser.parse_args()
+
 os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
-print(f"Generating Word doc from: {args.input}", flush=True)
+print(f"Template : {args.template}", flush=True)
+print(f"Input    : {args.input}", flush=True)
 
 # ── Load data ──────────────────────────────────────────────────────────────
 
-with open("master_resume.json", "r") as f:
-    master = json.load(f)
-
-with open(args.input, "r") as f:
+with open(args.input) as f:
     tailored = json.load(f)
+
+# ── Open template ──────────────────────────────────────────────────────────
+
+doc = Document(args.template)
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
-def set_font(run, bold=False, italic=False, size=10.5, color=None):
-    run.font.name = "Calibri"
-    run.font.size = Pt(size)
-    run.font.bold = bold
-    run.font.italic = italic
-    if color:
-        run.font.color.rgb = RGBColor(*color)
+def replace_para_text(para, new_text):
+    """
+    Replace all text in a paragraph's runs with new_text, preserving the
+    formatting (font, size, color, bold, italic) of the first run.
+    """
+    if not para.runs:
+        para.add_run(new_text)
+        return
+    para.runs[0].text = new_text
+    for run in para.runs[1:]:
+        run.text = ""
 
-def add_paragraph_shading(paragraph, fill_color):
-    pPr = paragraph._p.get_or_add_pPr()
-    shd = OxmlElement('w:shd')
-    shd.set(qn('w:val'), 'clear')
-    shd.set(qn('w:color'), 'auto')
-    shd.set(qn('w:fill'), fill_color)
-    pPr.append(shd)
 
-def add_paragraph_border(paragraph, bottom=True, top=False, color="000000", size=12):
-    pPr = paragraph._p.get_or_add_pPr()
-    pBdr = OxmlElement('w:pBdr')
-    if bottom:
-        bdr = OxmlElement('w:bottom')
-        bdr.set(qn('w:val'), 'single')
-        bdr.set(qn('w:sz'), str(size))
-        bdr.set(qn('w:space'), '0')
-        bdr.set(qn('w:color'), color)
-        pBdr.append(bdr)
-    if top:
-        bdr = OxmlElement('w:top')
-        bdr.set(qn('w:val'), 'single')
-        bdr.set(qn('w:sz'), str(size))
-        bdr.set(qn('w:space'), '0')
-        bdr.set(qn('w:color'), color)
-        pBdr.append(bdr)
-    pPr.append(pBdr)
+def remove_para(para):
+    """Remove a paragraph element from the document."""
+    para._element.getparent().remove(para._element)
 
-def add_right_tab(paragraph, pos=10204):
-    pPr = paragraph._p.get_or_add_pPr()
-    tabs = OxmlElement('w:tabs')
-    tab = OxmlElement('w:tab')
-    tab.set(qn('w:val'), 'right')
-    tab.set(qn('w:pos'), str(pos))
-    tabs.append(tab)
-    pPr.append(tabs)
 
-def add_bullet(doc, text, italic=True, bold=False):
-    p = doc.add_paragraph(style='List Bullet')
-    run = p.add_run(text)
-    set_font(run, italic=italic, bold=bold, size=10.5)
-    p.paragraph_format.space_after = Pt(0)
-    return p
+def set_xml_para_text(p_elem, text):
+    """
+    Set the visible text of a raw lxml <w:p> element.
+    Clears all runs then sets the first run's <w:t> to text.
+    """
+    runs = p_elem.findall(".//" + qn("w:r"))
+    if not runs:
+        return
+    for r in runs:
+        for t in r.findall(qn("w:t")):
+            t.text = ""
+    ts = runs[0].findall(qn("w:t"))
+    if ts:
+        ts[0].text = text
+        # xml:space="preserve" prevents Word from stripping leading/trailing spaces
+        ts[0].set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
 
-def add_section_header(doc, text):
-    p = doc.add_paragraph()
-    run = p.add_run(text)
-    set_font(run, bold=True, size=10.5)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    add_paragraph_shading(p, "D9D9D9")
-    add_paragraph_border(p, bottom=True, color="000000", size=12)
-    p.paragraph_format.space_after = Pt(0)
-    return p
 
-def add_spacer(doc, size=7):
-    p = doc.add_paragraph()
-    run = p.add_run("")
-    run.font.size = Pt(size)
-    p.paragraph_format.space_after = Pt(0)
-    return p
+# ── 0. Strip template-specific page-break layout from generated docs ───────
+# The FINAL resume has a hardcoded page break inside the BoA role description
+# paragraph that forces a "Page Two" header at a fixed position.  That only
+# works when content fills page 1 exactly.  In generated resumes the content
+# length varies, so we remove the break and the "Page Two" header line and
+# let Word paginate naturally.
 
-def add_company_line(doc, company, dates):
-    p = doc.add_paragraph()
-    r1 = p.add_run(company)
-    set_font(r1, size=10.5)
-    p.add_run("\t")
-    r2 = p.add_run(dates)
-    set_font(r2, bold=True, size=10.5)
-    p.paragraph_format.space_after = Pt(0)
-    add_right_tab(p)
-    return p
+PAGE_BREAK_ANCHOR  = "Served as Application Manager"
+PAGE_TWO_HEADER    = "Page Two"
+BOA_CONTINUED      = "BANK OF AMERICA (Continued)"
 
-def add_role_desc(doc, text):
-    p = doc.add_paragraph()
-    run = p.add_run(text)
-    set_font(run, size=10.5)
-    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p.paragraph_format.space_after = Pt(2)
-    return p
+# Walk a copy of the list — we may remove items mid-iteration
+for para in list(doc.paragraphs):
+    txt = para.text.strip()
 
-# ── Build Document ─────────────────────────────────────────────────────────
+    # Remove the run containing the page break from the BoA role description
+    if PAGE_BREAK_ANCHOR in txt:
+        for r in para._element.findall(".//" + qn("w:r")):
+            for br in r.findall(qn("w:br")):
+                if br.get(qn("w:type")) == "page":
+                    r.getparent().remove(r)
+                    print("✓ Hardcoded page break removed", flush=True)
+                    break
 
-doc = Document()
+    # Remove the "Page Two" header paragraph entirely
+    if PAGE_TWO_HEADER in txt:
+        remove_para(para)
+        print("✓ Page Two header removed", flush=True)
 
-# Set margins to match original
-section = doc.sections[0]
-section.page_width    = Inches(8.5)
-section.page_height   = Inches(11)
-section.top_margin    = Twips(576)
-section.bottom_margin = Twips(864)
-section.left_margin   = Twips(1008)
-section.right_margin  = Twips(1008)
+    # Remove the "BANK OF AMERICA (Continued)" label — redundant without page break
+    if txt == BOA_CONTINUED:
+        remove_para(para)
+        print("✓ BoA (Continued) label removed", flush=True)
 
-# Clear header
-section.header.is_linked_to_previous = False
-for p in section.header.paragraphs:
-    for r in p.runs:
-        r.text = ""
+# ── 1. Replace the summary paragraph ──────────────────────────────────────
+# The summary is the first paragraph whose text starts with the known anchor.
 
-identity = master["identity"]
+SUMMARY_ANCHOR = "IT Delivery Manager with experience"
 
-# ── HEADER ────────────────────────────────────────────────────────────────
+for para in doc.paragraphs:
+    if para.text.strip().startswith(SUMMARY_ANCHOR):
+        replace_para_text(para, tailored["tailored_summary"])
+        print("✓ Summary replaced", flush=True)
+        break
+else:
+    print("⚠ Summary paragraph not found — check SUMMARY_ANCHOR", flush=True)
 
-for line in [identity["name"], "774-573-8354", identity["location"], identity["email"]]:
-    p = doc.add_paragraph()
-    run = p.add_run(line)
-    set_font(run, bold=True, size=10.5)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    add_paragraph_shading(p, "F2F2F2")
-    p.paragraph_format.space_after = Pt(0)
+# ── 2. Replace Voya Financial bullets ─────────────────────────────────────
+# Collect the tailored Voya bullets from the JSON.
 
-# Divider line
-p = doc.add_paragraph()
-add_paragraph_shading(p, "F2F2F2")
-add_paragraph_border(p, bottom=True, color="000000", size=24)
-p.paragraph_format.space_after = Pt(0)
-
-# Title
-p = doc.add_paragraph()
-run = p.add_run("IT LEADER")
-set_font(run, bold=True, size=13)
-p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-p.paragraph_format.space_after = Pt(6)
-
-# Subtitle bar
-p = doc.add_paragraph()
-run = p.add_run("IT Consulting | Data Integrity | Service Management")
-set_font(run, bold=True, size=10.5)
-p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-add_paragraph_border(p, top=True, bottom=True, color="D9D9D9", size=4)
-p.paragraph_format.space_after = Pt(0)
-
-add_spacer(doc, 6)
-
-# ── SUMMARY ───────────────────────────────────────────────────────────────
-
-p = doc.add_paragraph()
-run = p.add_run(tailored["tailored_summary"])
-set_font(run, size=10.5)
-p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-p.paragraph_format.space_after = Pt(0)
-
-add_spacer(doc)
-
-# ── KEY CONTRIBUTIONS ─────────────────────────────────────────────────────
-
-add_spacer(doc)
-add_section_header(doc, "KEY CONTRIBUTIONS")
-add_spacer(doc)
-
-key_contribs = [
-    "IT Lead for a business project overseeing 30 application teams with a $2M+ budget",
-    "Diligently manage and oversee budgets and planning on projects from $250K to $3M.",
-    "Architect, Designer and Developer for a project to create an aircraft residual calculator for the Corporate Aircraft Finance Group of Bank of America Leasing responsible for $1.2B in business.",
-    "Technical Team Leader for the corporate site www.bankofamericaleasing.com, $32B in managed assets.",
+selected_voya = [
+    b["bullet"]
+    for b in tailored.get("selected_bullets", [])
+    if b.get("company") == "Voya Financial"
 ]
-for item in key_contribs:
-    add_bullet(doc, item, italic=False, bold=True)
 
-add_spacer(doc)
+# Walk paragraphs to find:
+#   - all existing List Paragraph bullets under the "IT Delivery Manager" role
+#   - the BANK OF AMERICA paragraph that follows them (insertion anchor)
 
-# ── CAREER EXPERIENCE ─────────────────────────────────────────────────────
+in_voya_role = False
+voya_bullet_paras = []
+boa_para = None
 
-add_section_header(doc, "CAREER EXPERIENCE")
-add_spacer(doc)
+for para in doc.paragraphs:
+    txt = para.text.strip()
+    style = para.style.name
 
-# Group selected bullets by company/title
-grouped = {}
-for b in tailored["selected_bullets"]:
-    key = f"{b['company']}||{b['title']}"
-    if key not in grouped:
-        grouped[key] = []
-    grouped[key].append(b["bullet"])
+    # The role line is a Normal paragraph with exactly "IT Delivery Manager"
+    if style == "Normal" and txt == "IT Delivery Manager":
+        in_voya_role = True
+        continue
 
-# Voya Financial
-add_company_line(doc, "Voya Financial", "October 2018 – Present")
-p = doc.add_paragraph()
-run = p.add_run("IT Delivery Manager")
-set_font(run, bold=True, size=10.5)
-p.paragraph_format.space_after = Pt(0)
+    if in_voya_role:
+        if style == "Normal" and txt.startswith("BANK OF AMERICA"):
+            boa_para = para
+            in_voya_role = False
+            break
+        if style == "List Paragraph" and txt:
+            voya_bullet_paras.append(para)
 
-add_role_desc(doc, "Oversees delivery, and execution of business prioritized IT programs and projects. Responsible for providing guidance and structure to project teams. These teams are comprised of a combination of vendor and FTE resources who are both onshore and offshore.")
+if not voya_bullet_paras:
+    print("⚠ Voya bullet paragraphs not found", flush=True)
+elif not boa_para:
+    print("⚠ BANK OF AMERICA anchor paragraph not found", flush=True)
+else:
+    n_existing = len(voya_bullet_paras)
+    n_selected = len(selected_voya)
 
-for b in grouped.get("Voya Financial||IT Delivery Manager", []):
-    add_bullet(doc, b)
-add_spacer(doc)
+    if n_selected == 0:
+        print("⚠ No Voya bullets in tailored JSON — template bullets left unchanged", flush=True)
+    elif n_selected <= n_existing:
+        # Replace the first n_selected paragraphs; remove the rest
+        for i, para in enumerate(voya_bullet_paras):
+            if i < n_selected:
+                replace_para_text(para, selected_voya[i])
+            else:
+                remove_para(para)
+        print(
+            f"✓ Voya bullets: replaced {n_selected}, removed {n_existing - n_selected}",
+            flush=True,
+        )
+    else:
+        # Fill all existing paragraphs, then clone extras before boa_para
+        for i, para in enumerate(voya_bullet_paras):
+            replace_para_text(para, selected_voya[i])
 
-# Bank of America header
-add_company_line(doc, "Bank of America", "February 2001 – October 2018")
+        template_bullet_elem = voya_bullet_paras[0]._element
+        last_elem = voya_bullet_paras[-1]._element  # track insertion point
+        for bullet_text in selected_voya[n_existing:]:
+            new_p = copy.deepcopy(template_bullet_elem)
+            set_xml_para_text(new_p, bullet_text)
+            # addnext inserts immediately after the last bullet, before any spacer
+            last_elem.addnext(new_p)
+            last_elem = new_p  # advance insertion point
 
-# Service Delivery Consultant
-p = doc.add_paragraph()
-r1 = p.add_run("Service Delivery Consultant/Tech Team Manager")
-set_font(r1, bold=True, size=10.5)
-r2 = p.add_run(", ")
-set_font(r2, size=10.5)
-r3 = p.add_run("February 2012 – Present")
-set_font(r3, italic=True, size=10.5)
-p.paragraph_format.space_after = Pt(0)
+        print(
+            f"✓ Voya bullets: replaced {n_existing}, added {n_selected - n_existing}",
+            flush=True,
+        )
 
-add_role_desc(doc, "Serve as an application manager supporting different lines of business while overseeing multiple financial and regulatory risk aligned applications. Manage a team of business analysts and developers to support both BAU and Initiative efforts.")
-
-for b in grouped.get("Bank of America||Service Delivery Consultant / Tech Team Manager", []):
-    add_bullet(doc, b)
-add_spacer(doc)
-
-# Technical Project Team Manager
-p = doc.add_paragraph()
-r1 = p.add_run("Technical Project Team Manager")
-set_font(r1, bold=True, size=10.5)
-r2 = p.add_run(", ")
-set_font(r2, size=10.5)
-r3 = p.add_run("August 2008 – February 2012")
-set_font(r3, italic=True, size=10.5)
-p.paragraph_format.space_after = Pt(0)
-
-add_role_desc(doc, "Spearheaded technical team's projects during all phases of the SDLC to completion. Managed and oversaw contractors, consultants and fulltime associates located in the U.S. and internationally.")
-
-for b in [
-    "Engaged with the Client Onboarding program to implement a document management solution using the Google Search appliance.",
-    "Partnered with the Know Your Customer (KYC) program in completing multiple projects to create a front end portal to be used by business partners.",
-    "Implemented a new frontend portal for the Party to Account program to drive efficiency and streamline processes.",
-]:
-    add_bullet(doc, b)
-add_spacer(doc)
-
-# Web Application Architect
-p = doc.add_paragraph()
-r1 = p.add_run("Web Application Architect")
-set_font(r1, bold=True, size=10.5)
-r2 = p.add_run(", ")
-set_font(r2, size=10.5)
-r3 = p.add_run("February 2001 – August 2008")
-set_font(r3, italic=True, size=10.5)
-p.paragraph_format.space_after = Pt(0)
-
-add_role_desc(doc, "Operated as senior developer for an Internet facing web based asset management system built on the Spring Framework, Hibernate and AJAX for the UI.")
-
-for b in [
-    "Functioned as Architect, Designer and Developer on a project to create an aircraft residual calculator for the Corporate Aircraft Finance Group of Bank of America Leasing which generated $1.2B in business for 2006.",
-    "Served as Technical Team Leader for the corporate site www.bankofamericaleasing.com, a leasing company responsible for $32B in managed assets.",
-    "Recognized and selected by CIO to fill the role Leasing Domain Architect.",
-    "Implemented Java to pull data from a Data Warehouse, convert to XML and batch process data with a third party financial calculator to give daily snapshots of the company portfolios and their profitability.",
-]:
-    add_bullet(doc, b)
-add_spacer(doc)
-
-# Click2Learn
-add_company_line(doc, "Click2Learn.com", "February 2000 – January 2001")
-p = doc.add_paragraph()
-run = p.add_run("Senior Developer")
-set_font(run, bold=True, size=10.5)
-p.paragraph_format.space_after = Pt(0)
-
-add_role_desc(doc, "Acted as senior developer for Custom Services Group which provided eLearning software development services for Fortune 1000 companies and was directly involved in major projects throughout the entire life cycle.")
-
-for b in [
-    "Completed projects with Microsoft, Prudential, Fidelity, Princeton Review and Data Dimension International.",
-    "Used Java, ASP, DHTML, CSS and JavaScript enabled web sites to collect user data.",
-]:
-    add_bullet(doc, b)
-
-# ── EDUCATION ─────────────────────────────────────────────────────────────
-
-add_spacer(doc)
-add_section_header(doc, "EDUCATION/CERTIFICATE")
-add_spacer(doc)
-
-for bold_part, normal_part in [
-    ("Master of Science, Information Systems (Distinction), ", "Bentley College"),
-    ("Bachelor of Science, Management of Information Systems (Magna Cum Laude), ", "Northeastern University"),
-]:
-    p = doc.add_paragraph()
-    r1 = p.add_run(bold_part)
-    set_font(r1, bold=True, size=10.5)
-    r2 = p.add_run(normal_part)
-    set_font(r2, size=10.5)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_after = Pt(3)
-
-for cert in [
-    "Project Management Professional (PMP) certified – Oct 2018 – Oct 2026",
-    "Certified ScrumMaster, CSM: Jan. 2018 – Jan. 2026",
-    "Retirement Income Certified Professional (RICP) April 2022 – Dec. 2025",
-]:
-    p = doc.add_paragraph()
-    run = p.add_run(cert)
-    set_font(run, bold=True, italic=True, size=10.5)
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p.paragraph_format.space_after = Pt(3)
-
-# ── Save ──────────────────────────────────────────────────────────────────
+# ── Save ───────────────────────────────────────────────────────────────────
 
 doc.save(args.output)
-print(f"Resume saved: {args.output}", flush=True)
+print(f"✓ Resume saved: {args.output}", flush=True)
