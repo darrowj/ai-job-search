@@ -15,6 +15,8 @@ with open("master_resume.json", "r") as f:
 
 # ── Fetch job description from URL ─────────────────────────────────────────
 
+MIN_DESCRIPTION_CHARS = 200  # anything shorter means JS-rendered page returned a shell
+
 def fetch_job_description(url):
     print(f"Fetching job description from: {url}", flush=True)
     headers = {
@@ -34,12 +36,39 @@ def fetch_job_description(url):
         # Trim to reasonable size for the API
         text = text[:4000]
 
-        print(f"Fetched {len(text)} characters of job description.", flush=True)
-        return text
+        if len(text) >= MIN_DESCRIPTION_CHARS:
+            print(f"Fetched {len(text)} characters of job description.", flush=True)
+            return text
+
+        # JS-rendered page — only a shell came back
+        print(f"⚠ Only {len(text)} characters returned — page is likely JS-rendered.", flush=True)
+        return None
 
     except Exception as e:
         print(f"Error fetching URL: {e}", flush=True)
         return None
+
+
+def prompt_for_manual_description():
+    """Ask the user to paste the job description directly into the terminal."""
+    print()
+    print("─" * 60)
+    print("The job posting couldn't be fetched automatically.")
+    print("Please paste the job description below.")
+    print("When done, press Enter then type END on its own line.")
+    print("─" * 60)
+    lines = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        if line.strip().upper() == "END":
+            break
+        lines.append(line)
+    text = "\n".join(lines).strip()
+    print(f"Received {len(text)} characters of job description.", flush=True)
+    return text or None
 
 # ── Tailor resume using Claude API ────────────────────────────────────────
 
@@ -117,7 +146,9 @@ if __name__ == "__main__":
     if args.url:
         description = fetch_job_description(args.url)
         if not description:
-            print("Failed to fetch job description. Try --description instead.")
+            description = prompt_for_manual_description()
+        if not description:
+            print("No job description provided. Exiting.")
             exit(1)
         title = args.title or "Position"
     elif args.description:
