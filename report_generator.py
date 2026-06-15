@@ -31,6 +31,8 @@ COL_REC = "Recommendation"
 COL_ENRICHED_DATE = "Enriched Date"
 COL_APPLY = "Apply URL"
 COL_STATUS = "Status"
+COL_MATCH_SCORE = "Match Score"
+COL_MATCH_NOTES = "Match Notes"
 
 _ALL_ROW_COLUMNS = (
     COL_TITLE,
@@ -53,6 +55,8 @@ _ALL_ROW_COLUMNS = (
     COL_ENRICHED_DATE,
     COL_APPLY,
     COL_STATUS,
+    COL_MATCH_SCORE,
+    COL_MATCH_NOTES,
 )
 
 
@@ -132,6 +136,36 @@ def badge_growth_class(text: str) -> str:
     if re.search(r"\bstable\b", t):
         return "status-active"
     return "status-next"
+
+
+def _match_score_value(raw) -> int | None:
+    """Return the match score as an int, or None when missing/blank/non-numeric."""
+    if raw is None:
+        return None
+    try:
+        if pd.isna(raw):
+            return None
+    except (TypeError, ValueError):
+        pass
+    s = str(raw).strip()
+    if not s or s.lower() == "nan":
+        return None
+    try:
+        return int(float(s))
+    except ValueError:
+        return None
+
+
+def badge_match_class(score) -> str:
+    """Resume match: green >=70, yellow 50-69, red <50, gray when no score."""
+    value = _match_score_value(score)
+    if value is None:
+        return "status-next"
+    if value >= 70:
+        return "status-done"
+    if value >= 50:
+        return "status-active"
+    return "status-declining"
 
 
 def build_tailor_command(company: str, title: str, url: str) -> str:
@@ -251,9 +285,13 @@ def render_job_card(
     apply_url = _s(row.get(COL_APPLY, ""))
     stability = _s(row.get(COL_STABILITY, ""))
     growth = _s(row.get(COL_GROWTH, ""))
+    match_score = row.get(COL_MATCH_SCORE, "")
+    match_notes = _s(row.get(COL_MATCH_NOTES, ""))
 
     stab_cls = badge_stability_class(stability)
     grow_cls = badge_growth_class(growth)
+    match_value = _match_score_value(match_score)
+    match_cls = badge_match_class(match_score)
 
     meta_primary = "".join(
         [
@@ -295,6 +333,15 @@ def render_job_card(
       <p class="about-text rec-text">{html.escape(rec)}</p>
     </div>"""
 
+    match_html = ""
+    if match_notes:
+        segments = [html.escape(seg.strip()) for seg in match_notes.split("|") if seg.strip()]
+        note_lines = "".join(f"""<p class="about-text match-text">{seg}</p>""" for seg in segments)
+        match_html = f"""<div class="match-callout">
+      <div class="stat-label">Resume match notes</div>
+      {note_lines}
+    </div>"""
+
     cmd_display = html.escape(build_tailor_command(company, title, apply_url))
 
     if apply_url:
@@ -302,9 +349,13 @@ def render_job_card(
     else:
         view_btn = """<span class="btn btn-disabled" aria-disabled="true">No apply URL</span>"""
 
+    match_badge = (
+        f"""\n      <span class="wave-status {match_cls}">Match: {match_value}%</span>"""
+        if match_value is not None else ""
+    )
     badges = f"""<div class="badge-row">
       <span class="wave-status {stab_cls}">Stability: {html.escape(stability or "—")}</span>
-      <span class="wave-status {grow_cls}">Growth trend: {html.escape(growth or "—")}</span>
+      <span class="wave-status {grow_cls}">Growth trend: {html.escape(growth or "—")}</span>{match_badge}
     </div>"""
 
     enriched_raw = row.get(COL_ENRICHED_DATE, "")
@@ -325,6 +376,7 @@ def render_job_card(
     </div>
     {news_html}
     {rec_html}
+    {match_html}
     {enriched_date_row}
     </div>
     <div class="job-block command-intro">
@@ -698,6 +750,17 @@ def _report_css() -> str:
     }
 
     .rec-text { margin-bottom: 0; color: var(--ink); }
+
+    .match-callout {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      padding: 1.2rem;
+      background: var(--paper);
+      margin: 1rem 0 1.5rem;
+    }
+
+    .match-text { margin: 0 0 0.4rem; color: var(--ink); }
+    .match-callout .match-text:last-child { margin-bottom: 0; }
 
     .command-intro { margin-top: 1rem; }
 

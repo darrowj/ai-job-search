@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import time
+import webbrowser
 from datetime import date as _date
 from pathlib import Path
 from typing import Optional
@@ -151,7 +152,6 @@ def _init_state() -> None:
         "selected_company": None,
         "stage_messages": {},   # stage_name -> human-readable last result
         "last_tailor_company": None,
-        "pasted_jd": "",
     }
     for k, v in defaults.items():
         st.session_state.setdefault(k, v)
@@ -380,13 +380,18 @@ with tab3:
                     "This report is from an earlier day. Click **Generate HTML Report** "
                     "above to produce one for today."
                 )
-            with report_path.open("rb") as f:
-                st.download_button(
-                    "Download latest HTML report",
-                    data=f.read(),
-                    file_name=report_path.name,
-                    mime="text/html",
-                )
+            col_dl, col_open = st.columns(2)
+            with col_dl:
+                with report_path.open("rb") as f:
+                    st.download_button(
+                        "Download latest HTML report",
+                        data=f.read(),
+                        file_name=report_path.name,
+                        mime="text/html",
+                    )
+            with col_open:
+                if st.button("Open in Browser", key="open_report_browser"):
+                    webbrowser.open(report_path.resolve().as_uri())
 
 
 # ── Tab 4: Tailor Resume ──────────────────────────────────────────────────
@@ -429,43 +434,49 @@ with tab4:
             url = str(row.get("Apply URL", "")).strip()
             st.session_state.selected_company = company
 
-            # TODO: resume_tailor.py fetches URLs with requests + BeautifulSoup.
-            # JS-rendered job pages (Adzuna redirects, LinkedIn, etc.) often
-            # return ~17 chars of body text. Fix options:
-            #   (a) switch fetch_job_description() to Playwright/Selenium, or
-            #   (b) pass the enriched Description column straight through.
-            mode = st.radio(
-                "Job description source",
-                ["Use Apply URL (auto-fetch)", "Paste description text"],
-                index=0 if url else 1,
-                horizontal=True,
-                key="tailor_mode",
-            )
+            # JSearch now stores the full posting in the "Job Description"
+            # column, so most roles are hands-free: pick the role and the
+            # description below auto-fills, then it's passed straight to both
+            # resume_tailor.py and cover_letter_generator.py via --description.
+            # The textarea stays editable and is the fallback for any role that
+            # was scraped without a description.
+            raw_jd = row.get("Job Description", "")
+            try:
+                jd_is_blank = bool(pd.isna(raw_jd))
+            except (TypeError, ValueError):
+                jd_is_blank = False
+            excel_jd = "" if jd_is_blank else str(raw_jd).strip()
 
-            pasted = ""
-            if mode == "Paste description text":
-                pasted = st.text_area(
-                    "Paste the full job description",
-                    value=st.session_state.pasted_jd,
-                    height=220,
-                    key="tailor_jd_textarea",
-                )
-                st.session_state.pasted_jd = pasted
+            # Seed the textarea from the Excel description whenever the selected
+            # role changes. Setting the widget's session_state value *before*
+            # the widget is created is the supported way to programmatically
+            # populate it; guarding on the label keeps later manual edits.
+            ta_key = "tailor_jd_textarea"
+            if st.session_state.get("jd_loaded_for") != chosen_label:
+                st.session_state[ta_key] = excel_jd
+                st.session_state["jd_loaded_for"] = chosen_label
+
+            if excel_jd:
+                st.caption("Job description auto-filled from the scraped Excel. Edit if needed.")
+            else:
+                st.caption("No description was scraped for this role — paste one below.")
+            if url:
+                st.caption(f"Posting: [{url}]({url})")
+
+            jd_text = st.text_area(
+                "Job description (used for both the resume and cover letter)",
+                key=ta_key,
+                height=240,
+            )
+            jd_clean = jd_text.strip()
 
             cmd = ["python3", "resume_tailor.py", "--company", company, "--title", title]
-            if mode == "Use Apply URL (auto-fetch)":
-                if url:
-                    cmd += ["--url", url]
-                else:
-                    st.warning("This row has no Apply URL — switch to 'Paste description text'.")
-            else:
-                if pasted.strip():
-                    cmd += ["--description", pasted]
+            if jd_clean:
+                cmd += ["--description", jd_clean]
 
-            ready = (
-                (mode == "Use Apply URL (auto-fetch)" and bool(url))
-                or (mode == "Paste description text" and bool(pasted.strip()))
-            )
+            ready = bool(jd_clean)
+            if not ready:
+                st.warning("Provide a job description above to tailor the resume.")
 
             if st.button("Tailor Resume", type="primary", disabled=not ready, key="run_tailor"):
                 run_script(cmd)
@@ -525,6 +536,50 @@ with tab4:
                     else:
                         st.caption("Generate the Word doc to enable download.")
 
+                # ── Cover letter ──────────────────────────────────────────
+                st.divider()
+                st.markdown("#### Cover Letter")
+                st.caption(
+                    "Uses the same job description above (auto-filled from the "
+                    "scraped Excel when available) plus the tailored bullet "
+                    "selection for this role."
+                )
+
+                cl_path = PERSONAL_DIR / f"CoverLetter_{slug}.docx"
+                col_cl, col_cld = st.columns(2)
+                jd_for_cl = jd_clean
+                with col_cl:
+                    cl_ready = bool(jd_for_cl)
+                    if not cl_ready:
+                        st.caption("Provide a job description above to enable cover letter generation.")
+                    if st.button(
+                        "Generate Cover Letter",
+                        key="run_cover_letter",
+                        disabled=not cl_ready,
+                    ):
+                        run_script([
+                            "python3", "cover_letter_generator.py",
+                            "--company",     company,
+                            "--title",       title,
+                            "--description", jd_for_cl,
+                            "--input",       str(tailored_path.relative_to(HERE)),
+                            "--output",      str(cl_path.relative_to(HERE)),
+                        ])
+                with col_cld:
+                    if cl_path.exists():
+                        with cl_path.open("rb") as f:
+                            st.download_button(
+                                f"Download {cl_path.name}",
+                                data=f.read(),
+                                file_name=cl_path.name,
+                                mime=(
+                                    "application/vnd.openxmlformats-"
+                                    "officedocument.wordprocessingml.document"
+                                ),
+                            )
+                    else:
+                        st.caption("Generate the cover letter to enable download.")
+
 
 # ── Tab 5: Status / Tracker ───────────────────────────────────────────────
 
@@ -552,16 +607,29 @@ with tab5:
                 slug = safe_company_slug(company)
                 tailored_exists = (OUTPUT_DIR / f"tailored_{slug}.json").exists()
                 docx_exists = (PERSONAL_DIR / f"Jason_Darrow_Resume_{slug}.docx").exists()
+                cl_exists = (PERSONAL_DIR / f"CoverLetter_{slug}.docx").exists()
                 enriched = (
                     bool(str(r.get("Industry", "") or "").strip())
                     if "Industry" in df.columns else False
                 )
+                match_raw = r.get("Match Score", "")
+                match_score = str(match_raw).strip()
+                if match_score.lower() == "nan":
+                    match_score = ""
+                elif match_score:
+                    # Drop pandas float artifacts so 85.0 displays as 85.
+                    try:
+                        match_score = str(int(float(match_score)))
+                    except ValueError:
+                        pass
                 rows.append({
                     "Company": company,
                     "Title": str(r.get("Title", "")),
                     "Enriched": "✅" if enriched else "—",
                     "Tailored": "✅" if tailored_exists else "—",
                     "Resume DOCX": "✅" if docx_exists else "—",
+                    "Cover Letter": "✅" if cl_exists else "—",
+                    "Match Score": f"{match_score}%" if match_score else "—",
                 })
             st.dataframe(
                 pd.DataFrame(rows),

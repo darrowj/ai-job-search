@@ -8,13 +8,13 @@
   "_comment_require_title_keywords": "At least ONE of these words must appear in the job title or the result is dropped. This keeps noise out. Case-insensitive. Tune this list if you are getting unrelated results.",
   "require_title_keywords": ["delivery", "program manager", "project manager", "technical program", "IT manager", "technology manager", "PMO", "portfolio manager"],
 
-  "_comment_max_days_old": "Drop any listing older than this many days. Keeps your pipeline fresh. Recommended: 14. Set to 30 if volume is too low.",
-  "max_days_old": 14,
+  "_comment_max_days_old": "Drop any listing older than this many days. Also maps to the JSearch date_posted bucket (<=3 -> 3days, <=7 -> week, <=30 -> month). Recommended: 14. Set to 30 if volume is too low.",
+  "max_days_old": 7,
 
-  "_comment_job_type": "Filter by employment type. Options: 'full_time', 'contract', 'part_time'. Leave as empty string '' to return all types.",
+  "_comment_job_type": "Set to 'full_time' to keep only full-time roles (applied as a post-fetch filter on the JSearch job_employment_type field). Leave as empty string '' to return all types.",
   "job_type": "",
 
-  "_comment_pages": "Number of pages to fetch from the API. Each page returns up to 50 results. Start with 2. Increase if you are not seeing enough listings.",
+  "_comment_pages": "Max pages of JSearch results to fetch per title+location query. Each page returns up to 10 results via cursor pagination. Start with 2. Increase if you are not seeing enough listings.",
   "pages": 2,
 
   "_comment_min_salary": "Salary floor is configured privately in your .env file as MIN_SALARY=100000. It is intentionally excluded here to protect salary negotiation position.",

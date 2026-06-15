@@ -17,6 +17,9 @@ except ImportError:
 
 load_dotenv()
 
+with open("master_resume.json", "r") as f:
+    MASTER_RESUME = json.load(f)
+
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 client = anthropic.Anthropic()
 
@@ -128,6 +131,44 @@ Return ONLY a JSON object in this exact format — no other text:
     return json.loads(response_text[start:end])
 
 
+def get_resume_match(job_description, master_resume):
+    """Use Claude to score how well the master resume matches a job description.
+
+    Returns a dict with match_score (int 0-100) and match_notes (str).
+    """
+    prompt = f"""You are evaluating how well a candidate's resume matches a job description.
+
+MASTER RESUME (JSON — bullets, tags, and strength scores):
+{json.dumps(master_resume, indent=2)}
+
+JOB DESCRIPTION:
+{job_description}
+
+Analyze the match. Return ONLY a JSON object in this exact format — no other text:
+{{
+  "match_score": <integer 0-100>,
+  "match_notes": "<2-3 specific strengths that match this role, then 1-2 gaps. Plain text, no bullet symbols, pipe-separated. Example: Strong program delivery experience matches PM requirements | PMP cert directly relevant | No cloud infrastructure background mentioned in resume>"
+}}
+
+Scoring guide:
+- 80-100: Strong match. Most key requirements covered, relevant industry/domain.
+- 60-79: Good match. Core skills align, some gaps.
+- 40-59: Partial match. Transferable skills but meaningful gaps.
+- Below 40: Weak match. Major requirements unmet.
+"""
+
+    message = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1024,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    response_text = message.content[0].text
+    start = response_text.find("{")
+    end = response_text.rfind("}") + 1
+    return json.loads(response_text[start:end])
+
+
 def _normalize_founded_value(raw) -> str:
     """Avoid Excel float year artifacts when saving (e.g. store 1995 not 1995.0)."""
     if raw is None or (isinstance(raw, float) and pd.isna(raw)):
@@ -144,12 +185,26 @@ def _normalize_founded_value(raw) -> str:
     return s
 
 
+def _normalize_match_score(raw):
+    """Keep the match score as an int when possible; blank otherwise (no '50.0')."""
+    if raw is None or (isinstance(raw, float) and pd.isna(raw)):
+        return ""
+    s = str(raw).strip()
+    if not s or s.lower() == "nan":
+        return ""
+    try:
+        return int(float(s))
+    except ValueError:
+        return ""
+
+
 ENRICHMENT_TEXT_COLUMNS = [
     "Industry", "HQ Location", "Company Size", "Founded",
     "Market Cap", "Description", "Stability", "Growth Trend",
     "News 1", "News 2", "News 3",
     "News 1 URL", "News 2 URL", "News 3 URL",
     "Recommendation", "Enriched Date",
+    "Match Score", "Match Notes",
 ]
 
 
@@ -161,6 +216,9 @@ def _prepare_enrichment_columns(df: pd.DataFrame) -> None:
             continue
         if col == "Founded":
             df[col] = df[col].apply(_normalize_founded_value)
+        elif col == "Match Score":
+            # Coerce to int where possible (not string) so 50 stays 50, not "50.0".
+            df[col] = df[col].apply(_normalize_match_score)
         else:
             df[col] = df[col].fillna("").astype(str)
         df[col] = df[col].astype(object)
@@ -227,7 +285,8 @@ def enrich_jobs(excel_file=os.path.join("output", "job_listings.xlsx")):
                 "Market Cap", "Description", "Stability", "Growth Trend",
                 "News 1", "News 2", "News 3",
                 "News 1 URL", "News 2 URL", "News 3 URL",
-                "Recommendation", "Enriched Date"]
+                "Recommendation", "Enriched Date",
+                "Match Score", "Match Notes"]
     for col in new_cols:
         if col not in df.columns:
             df[col] = ""
@@ -263,6 +322,35 @@ def enrich_jobs(excel_file=os.path.join("output", "job_listings.xlsx")):
             df.at[idx, "Enriched Date"]  = str(date.today())
 
             print(f"  ✓ Done — {intel.get('stability')} / {intel.get('growth_trend')}", flush=True)
+
+            # ── Resume match score ──────────────────────────────────────
+            # Only score when there is a real job description and the row
+            # has not already been scored (avoid re-computing on re-runs).
+            # A failure here must not abort the enrichment that just succeeded.
+            jd_raw = row.get("Job Description", "")
+            job_description = (
+                "" if (jd_raw is None or (isinstance(jd_raw, float) and pd.isna(jd_raw)))
+                else str(jd_raw)
+            )
+            existing_score = df.at[idx, "Match Score"]
+            already_scored = not (
+                existing_score is None
+                or existing_score == ""
+                or (isinstance(existing_score, float) and pd.isna(existing_score))
+            )
+
+            if already_scored:
+                print(f"  Match score already present ({existing_score}) — skipping.", flush=True)
+            elif len(job_description) > 200:
+                try:
+                    intel_match = get_resume_match(job_description, MASTER_RESUME)
+                    df.at[idx, "Match Score"] = intel_match.get("match_score", "")
+                    df.at[idx, "Match Notes"] = intel_match.get("match_notes", "")
+                    print(f"  ✓ Resume match: {intel_match.get('match_score')}/100", flush=True)
+                except Exception as e:
+                    print(f"  ✗ Match score error: {e}", flush=True)
+            else:
+                print("  ⚠ No job description — match score skipped", flush=True)
 
         except Exception as e:
             print(f"  ✗ Error enriching {company}: {e}", flush=True)

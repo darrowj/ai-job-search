@@ -2,6 +2,7 @@ import requests
 from datetime import date, datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
+import sys
 import shutil
 import pandas as pd
 import argparse
@@ -10,24 +11,37 @@ import re
 
 # Load API credentials from .env file
 load_dotenv()
-ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
-ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
+JSEARCH_API_KEY = os.getenv("JSEARCH_API_KEY")
 MIN_SALARY = int(os.getenv("MIN_SALARY", 0))
 
-ADZUNA_RESULTS_PER_PAGE = 50  # Adzuna allows up to 50 per page
+JSEARCH_ENDPOINT = "https://api.openwebninja.com/jsearch/search-v2"
+REQUEST_TIMEOUT = 30  # seconds
 DEFAULT_CONFIG_FILE = "search_config.json"
 
 
-def _format_adzuna_salary(job):
-    smin = job.get("salary_min")
-    smax = job.get("salary_max")
+def _to_number(value):
+    """Coerce a salary value to float; return None if missing or non-numeric."""
+    if value is None:
+        return None
+    try:
+        return float(str(value).replace(",", "").replace("$", "").strip())
+    except (ValueError, TypeError):
+        return None
+
+
+def _format_salary(smin, smax, period=None):
+    """Render a salary range in the same '$X - $Y' style used previously.
+
+    Appends '/hr' when the salary period is hourly. Returns 'Not listed' when
+    both bounds are missing.
+    """
     if smin is None and smax is None:
         return "Not listed"
 
     def fmt(n):
         return f"${n:,.0f}"
 
-    suffix = " (estimate)" if job.get("salary_is_predicted") else ""
+    suffix = "/hr" if str(period or "").upper() == "HOUR" else ""
 
     if smin is not None and smax is not None:
         if smin == smax:
@@ -39,26 +53,29 @@ def _format_adzuna_salary(job):
     return f"Up to {fmt(smax)}{suffix}"
 
 
-def _adzuna_job_to_row_shape(job):
-    """Map Adzuna search results to the same keys jobs_to_rows expects."""
-    company = job.get("company") or {}
-    loc = job.get("location") or {}
-    parts = [p for p in (job.get("contract_time"), job.get("contract_type")) if p]
-    employment = " / ".join(parts) if parts else "Unknown"
-    blob = f"{job.get('title') or ''} {(job.get('description') or '')[:800]}".lower()
-    is_remote = any(
-        w in blob for w in ("remote", "work from home", "wfh", "fully remote", "100% remote")
-    )
+def _jsearch_job_to_row_shape(job):
+    """Map a JSearch result to the internal keys jobs_to_rows/filter_jobs expect."""
+    smin = _to_number(job.get("job_min_salary"))
+    smax = _to_number(job.get("job_max_salary"))
+    period = job.get("job_salary_period")
+    # search-v2 leaves work_arrangement null and populates the boolean
+    # job_is_remote instead, so prefer work_arrangement when present and fall
+    # back to the boolean flag. Either way this is a structured field, not a
+    # regex over the description.
+    is_remote = (job.get("work_arrangement") == "remote") or bool(job.get("job_is_remote"))
     return {
-        "job_title": job.get("title"),
-        "employer_name": company.get("display_name", ""),
-        "job_location": loc.get("display_name", ""),
-        "job_salary_string": _format_adzuna_salary(job),
-        "job_posted_at": job.get("created") or "Unknown",
-        "job_employment_type": employment,
+        "job_title": job.get("job_title"),
+        "employer_name": job.get("employer_name") or "",
+        "job_location": job.get("job_location") or "",
+        "job_min_salary": smin,
+        "job_max_salary": smax,
+        "job_salary_string": _format_salary(smin, smax, period),
+        "job_posted_at": job.get("job_posted_at_datetime_utc") or "Unknown",
+        "job_employment_type": job.get("job_employment_type") or "Unknown",
         "job_is_remote": is_remote,
-        "job_publisher": "Adzuna",
-        "job_apply_link": job.get("redirect_url") or "",
+        "job_publisher": job.get("job_publisher") or "",
+        "job_apply_link": job.get("job_apply_link") or "",
+        "job_description": (job.get("job_description") or "")[:8000],
     }
 
 
@@ -69,7 +86,24 @@ def load_search_config(filename=DEFAULT_CONFIG_FILE):
     return {k: v for k, v in raw_config.items() if not k.startswith("_")}
 
 
-def _parse_adzuna_datetime(value):
+def _map_date_posted(max_days_old):
+    """Map the config's max_days_old to JSearch's date_posted buckets."""
+    if max_days_old is None:
+        return None
+    try:
+        d = int(max_days_old)
+    except (ValueError, TypeError):
+        return None
+    if d <= 3:
+        return "3days"
+    if d <= 7:
+        return "week"
+    if d <= 30:
+        return "month"
+    return None
+
+
+def _parse_datetime(value):
     if not value or value == "Unknown":
         return None
     try:
@@ -82,7 +116,7 @@ def _is_older_than_max_days(job, max_days_old):
     if max_days_old is None:
         return False
 
-    posted_at = _parse_adzuna_datetime(job.get("job_posted_at"))
+    posted_at = _parse_datetime(job.get("job_posted_at"))
     if posted_at is None:
         return False
 
@@ -115,10 +149,26 @@ def re_search_word(keyword, text):
     return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
 
 
-def filter_jobs(jobs, max_days_old=None, require_title_keywords=None):
+def _passes_salary_filter(job, min_salary):
+    """Keep listings with no salary data; otherwise require the upper bound
+    (or the lower bound when the upper is missing) to clear MIN_SALARY."""
+    if not min_salary:
+        return True
+    smin = job.get("job_min_salary")
+    smax = job.get("job_max_salary")
+    if smin is None and smax is None:
+        return True
+    if smax is not None:
+        return smax >= min_salary
+    return smin >= min_salary
+
+
+def filter_jobs(jobs, max_days_old=None, require_title_keywords=None,
+                min_salary=None, job_type=None):
     counts = {
         "max_days_old": 0,
         "require_title_keywords": 0,
+        "min_salary": 0,
     }
     kept = []
 
@@ -129,49 +179,62 @@ def filter_jobs(jobs, max_days_old=None, require_title_keywords=None):
         if not _title_matches_required_keyword(job, require_title_keywords):
             counts["require_title_keywords"] += 1
             continue
+        if not _passes_salary_filter(job, min_salary):
+            counts["min_salary"] += 1
+            continue
+        if job_type == "full_time":
+            employment = (job.get("job_employment_type") or "").lower()
+            if "full" not in employment:
+                continue
         kept.append(job)
 
     return kept, counts
 
 
-def search_jobs(search_term, location, num_pages=1, min_salary=None, job_type=None):
-    print(f"Searching for '{search_term}' jobs in '{location}'...", flush=True)
+def search_jobs(query, date_posted=None, max_pages=1):
+    """Fetch up to max_pages of JSearch results (10 per page) via cursor paging."""
+    print(f"Searching JSearch for '{query}'...", flush=True)
 
-    if not ADZUNA_APP_ID or not ADZUNA_APP_KEY:
-        print("  Missing ADZUNA_APP_ID or ADZUNA_APP_KEY in environment (.env).", flush=True)
-        return []
+    headers = {"x-api-key": JSEARCH_API_KEY}
+    results = []
+    cursor = None
 
-    headers = {"Accept": "application/json"}
-    all_raw = []
+    for _ in range(max(1, int(max_pages))):
+        params = {"query": query}
+        if date_posted:
+            params["date_posted"] = date_posted
+        if cursor:
+            params["cursor"] = cursor
 
-    for page in range(1, num_pages + 1):
-        url = f"https://api.adzuna.com/v1/api/jobs/us/search/{page}"
-        params = {
-            "app_id": ADZUNA_APP_ID,
-            "app_key": ADZUNA_APP_KEY,
-            "what": search_term,
-            "where": location,
-            "results_per_page": ADZUNA_RESULTS_PER_PAGE,
-            "sort_by": "date",
-        }
-        if min_salary:
-            params["salary_min"] = min_salary
-        if job_type == "full_time":
-            params["full_time"] = 1
+        try:
+            response = requests.get(
+                JSEARCH_ENDPOINT, headers=headers, params=params, timeout=REQUEST_TIMEOUT
+            )
+        except requests.RequestException as e:
+            print(f"  Request error: {e}", flush=True)
+            break
 
-        response = requests.get(url, headers=headers, params=params, timeout=60)
         if response.status_code != 200:
-            print(f"  Adzuna API error {response.status_code}: {response.text[:200]}", flush=True)
-            break
-        payload = response.json()
-        batch = payload.get("results") or []
-        all_raw.extend(batch)
-        if len(batch) < ADZUNA_RESULTS_PER_PAGE:
+            print(
+                f"  JSearch API error {response.status_code}: {response.text[:200]}",
+                flush=True,
+            )
             break
 
-    jobs = [_adzuna_job_to_row_shape(j) for j in all_raw]
-    print(f"  Found {len(jobs)} jobs.", flush=True)
-    return jobs
+        payload = response.json()
+        # search-v2 nests results under data.jobs and the paging token under
+        # data.cursor (not a top-level data[]/next_cursor as some docs state).
+        data = payload.get("data") or {}
+        batch = data.get("jobs") or []
+        results.extend(_jsearch_job_to_row_shape(j) for j in batch)
+
+        cursor = data.get("cursor")
+        if not cursor:
+            break
+
+    print(f"  Found {len(results)} jobs.", flush=True)
+    return results
+
 
 def jobs_to_rows(jobs, search_term, location):
     rows = []
@@ -188,11 +251,29 @@ def jobs_to_rows(jobs, search_term, location):
             "Remote":      "Yes" if job.get("job_is_remote") else "No",
             "Publisher":   job.get("job_publisher"),
             "Apply URL":   job.get("job_apply_link"),
+            "Job Description": job.get("job_description", ""),
             "Date Found":  str(date.today()),
             "Status":      "New",
             "Notes":       ""
         })
     return rows
+
+
+def deduplicate_rows(rows):
+    """Dedupe on (Company, Title), case-insensitive after stripping. Keep first."""
+    seen = set()
+    deduped = []
+    for r in rows:
+        key = (
+            str(r.get("Company") or "").strip().lower(),
+            str(r.get("Title") or "").strip().lower(),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(r)
+    return deduped
+
 
 def save_to_excel(all_rows, filename="job_listings.xlsx"):
     if not all_rows:
@@ -201,13 +282,6 @@ def save_to_excel(all_rows, filename="job_listings.xlsx"):
 
     os.makedirs(os.path.dirname(filename) or ".", exist_ok=True)
     df = pd.DataFrame(all_rows)
-
-    # Remove duplicate listings by URL
-    before = len(df)
-    df = df.drop_duplicates(subset=["Apply URL"])
-    after = len(df)
-    if before != after:
-        print(f"Removed {before - after} duplicate listings.", flush=True)
 
     # Sort by company name
     df = df.sort_values("Company")
@@ -240,6 +314,14 @@ if __name__ == "__main__":
         help="Output Excel filename"
     )
     args = parser.parse_args()
+
+    if not JSEARCH_API_KEY:
+        print(
+            "Error: JSEARCH_API_KEY is missing from the environment (.env). Cannot continue.",
+            flush=True,
+        )
+        sys.exit(1)
+
     config = load_search_config()
 
     titles = config.get("titles", [])
@@ -249,29 +331,30 @@ if __name__ == "__main__":
     job_type = config.get("job_type")
     require_title_keywords = config.get("require_title_keywords", [])
 
+    date_posted = _map_date_posted(max_days_old)
+
     # Run all combinations of titles and locations
     all_rows = []
     total_before_filters = 0
     total_removed_by_date = 0
     total_removed_by_title_allowlist = 0
+    total_removed_by_salary = 0
 
     for title in titles:
         for location in locations:
-            jobs = search_jobs(
-                title,
-                location,
-                num_pages=pages,
-                min_salary=MIN_SALARY,
-                job_type=job_type,
-            )
+            query = f"{title} in {location}"
+            jobs = search_jobs(query, date_posted=date_posted, max_pages=pages)
             total_before_filters += len(jobs)
             jobs, filter_counts = filter_jobs(
                 jobs,
                 max_days_old=max_days_old,
                 require_title_keywords=require_title_keywords,
+                min_salary=MIN_SALARY,
+                job_type=job_type,
             )
             total_removed_by_date += filter_counts["max_days_old"]
             total_removed_by_title_allowlist += filter_counts["require_title_keywords"]
+            total_removed_by_salary += filter_counts["min_salary"]
             rows = jobs_to_rows(jobs, title, location)
             all_rows.extend(rows)
 
@@ -279,11 +362,18 @@ if __name__ == "__main__":
         "\nFiltering summary: "
         f"removed {total_removed_by_date} older than {max_days_old} days; "
         f"removed {total_removed_by_title_allowlist} by title allowlist; "
+        f"removed {total_removed_by_salary} below salary floor; "
         f"kept {len(all_rows)} of {total_before_filters} jobs before dedup.",
         flush=True,
     )
-    print(f"\nTotal listings before dedup: {len(all_rows)}", flush=True)
-    save_to_excel(all_rows, args.output)
+
+    final_rows = deduplicate_rows(all_rows)
+    print(
+        f"\nTotal listings before dedup: {len(all_rows)}; after dedup: {len(final_rows)}",
+        flush=True,
+    )
+
+    save_to_excel(final_rows, args.output)
     default_out = _default_output_filename()
-    if all_rows and os.path.normpath(args.output) == os.path.normpath(default_out):
+    if final_rows and os.path.normpath(args.output) == os.path.normpath(default_out):
         _archive_copy(args.output)
