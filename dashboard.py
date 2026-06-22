@@ -222,7 +222,7 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 with tab1:
     st.subheader("Run the scraper")
     st.write(
-        "Reads `search_config.json`, queries Adzuna, and writes "
+        "Reads `search_config.json`, queries JSearch (OpenWeb Ninja), and writes "
         f"`{JOB_FILE.relative_to(HERE)}`. "
         "A dated snapshot is also saved under `output/archive/`."
     )
@@ -587,7 +587,7 @@ with tab5:
     st.subheader("Pipeline status")
     st.caption(
         "Lightweight tracker derived from files on disk. "
-        "Wave 5 will replace this with a SQLite database."
+        "Wave 7 will replace this with a full application tracker."
     )
     df = load_job_df()
     if df is None:

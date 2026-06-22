@@ -458,30 +458,32 @@
 
   <h3>What I Built</h3>
   <p>
-    A personal AI agent that finds job listings, scores them against
-    my experience, tailors my resume for each role using the Claude API,
-    and generates a submission-ready Word document. It runs from a
-    Streamlit dashboard or the command line. Built to solve my own job
-    search problem while learning AI development.
+    A job search tool I built for myself — and the first real AI project
+    I have built and actually use. It surfaces relevant listings, gives me the company
+    intelligence I need to decide whether to apply, and then handles the
+    time-consuming parts: selecting the right resume bullets and drafting
+    a cover letter. I stay in the loop at every step.
   </p>
   <p>
-    The system scrapes multiple job boards across multiple locations,
-    enriches listings with company intelligence, filters by salary and relevance
-    using a config-driven allowlist, and uses a 53-bullet master resume database
-    to select the most relevant content for each role. A Streamlit dashboard
-    ties the whole pipeline together — each stage runs from a button, with
-    live logs streamed into the browser.
+    The pipeline scrapes job boards across multiple titles and locations,
+    then I review each listing and mark the roles I want to pursue. For
+    those roles, the system pulls company background, news, and a
+    Claude-generated match score that compares the job description against
+    my full 57-bullet resume database. I use that score to decide whether
+    to move forward. When I do, Claude selects the best-fit bullets and
+    drafts both a tailored resume and a voice-matched cover letter — both
+    as editable Word documents I review and refine before anything goes out.
   </p>
 
   <div class="tags">
     <span class="tag">Python 3</span>
     <span class="tag">Claude API</span>
     <span class="tag">Streamlit</span>
-    <span class="tag">Adzuna API</span>
+    <span class="tag">JSearch API (OpenWeb Ninja)</span>
     <span class="tag">NewsAPI</span>
+    <span class="tag">DuckDuckGo</span>
     <span class="tag">python-docx</span>
     <span class="tag">pandas</span>
-    <span class="tag">BeautifulSoup</span>
     <span class="tag">AWS S3</span>
     <span class="tag">Git</span>
   </div>
@@ -495,18 +497,28 @@
 <span class="comment"># ...or run each stage from the command line</span>
 <span class="cmd">$ python3 job_scraper.py</span>
 <span class="ok">✓ 42 jobs found · 18 passed filters</span>
+<span class="ok">✓ Job descriptions captured for each posting</span>
 <span class="ok">✓ Saved: job_listings.xlsx</span>
 
-<span class="comment"># Tailor resume to a specific role</span>
+<span class="comment"># Tailor resume to a specific role (JD auto-filled from Excel)</span>
 <span class="cmd">$ python3 resume_tailor.py \
     --company "Fidelity" \
-    --url "https://linkedin.com/..."</span>
+    --title "IT Delivery Manager" \
+    --description "..."</span>
+<span class="ok">✓ Match score: 93 / 100</span>
+<span class="ok">✓ Bullets selected and summary rewritten</span>
 
 <span class="comment"># Generate submission-ready Word doc</span>
 <span class="cmd">$ python3 resume_generator.py \
-    --input tailored_Fidelity.json</span>
-<span class="ok">✓ Match score: 93 / 100</span>
-<span class="ok">✓ Resume saved: Jason_Darrow_Resume.docx</span></div>
+    --input output/tailored_Fidelity.json</span>
+<span class="ok">✓ Resume saved: Jason_Darrow_Resume_Fidelity.docx</span>
+
+<span class="comment"># Generate voice-matched cover letter</span>
+<span class="cmd">$ python3 cover_letter_generator.py \
+    --company "Fidelity" \
+    --title "IT Delivery Manager" \
+    --description "..."</span>
+<span class="ok">✓ Cover letter saved: CoverLetter_Fidelity.docx</span></div>
 
   <!-- PROJECT 1 WAVE LOG -->
   <div class="section-label" style="margin-top: 56px;" id="waves">Build Log — AI Job Search</div>
@@ -515,7 +527,7 @@
       <div class="wave-num">0</div>
       <div>
         <div class="wave-title">Resume Database</div>
-        <p class="wave-desc">Structured master resume in JSON — 53 bullets tagged by skill, strength scored, ready for AI selection.</p>
+        <p class="wave-desc">Structured master resume in JSON — 57 bullets tagged by skill, strength scored, ready for AI selection.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
@@ -523,7 +535,7 @@
       <div class="wave-num">1</div>
       <div>
         <div class="wave-title">Job Scraper</div>
-        <p class="wave-desc">Config-driven job search via Adzuna API. Filters by salary, recency, job type, and title allowlist. Outputs to dated Excel.</p>
+        <p class="wave-desc">Config-driven job search via JSearch API (OpenWeb Ninja). Captures full job descriptions at scrape time. Filters by salary, recency, job type, and title allowlist. Outputs to dated Excel.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
@@ -539,7 +551,7 @@
       <div class="wave-num">2.5</div>
       <div>
         <div class="wave-title">Company Intelligence</div>
-        <p class="wave-desc">Enriches shortlisted roles with company background, recent news, and industry data via Wikipedia and NewsAPI.</p>
+        <p class="wave-desc">Enriches shortlisted roles with company background, recent news, and industry data via DuckDuckGo and NewsAPI. Claude API scores each role against the master resume (0–100 match) and displays the badge in the HTML report.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
@@ -570,13 +582,21 @@
     <div class="wave">
       <div class="wave-num">6</div>
       <div>
+        <div class="wave-title">AI Cover Letter Generator</div>
+        <p class="wave-desc">Claude API generates a voice-matched cover letter grounded in the same bullets selected for the tailored resume. Writing rules, anti-AI guardrails, and before/after examples embedded directly in the prompt. Outputs a submission-ready .docx.</p>
+      </div>
+      <span class="badge badge-complete">Complete</span>
+    </div>
+    <div class="wave">
+      <div class="wave-num">7</div>
+      <div>
         <div class="wave-title">Application Tracker</div>
-        <p class="wave-desc">SQLite database to track applications from submission through offer, surfaced in the dashboard.</p>
+        <p class="wave-desc">Notion API integration to track applications from submission through offer — synced from the pipeline automatically.</p>
       </div>
       <span class="badge badge-planned">Planned</span>
     </div>
     <div class="wave">
-      <div class="wave-num">7</div>
+      <div class="wave-num">8</div>
       <div>
         <div class="wave-title">Expanded Search</div>
         <p class="wave-desc">Additional job source integrations for broader, fresher listings across more platforms.</p>
