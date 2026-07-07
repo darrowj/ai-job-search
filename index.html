@@ -75,9 +75,73 @@
 
     /* ── HERO ── */
     .hero {
+      position: relative;
+      overflow: hidden;
       max-width: 860px;
       margin: 0 auto;
       padding: 100px 40px 80px;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: -120px;
+      z-index: -1;
+      pointer-events: none;
+      filter: blur(70px);
+    }
+
+    .hero-bg span {
+      position: absolute;
+      border-radius: 50%;
+    }
+
+    .hero-bg span:nth-child(1) {
+      width: 420px;
+      height: 420px;
+      top: -100px;
+      left: 5%;
+      background: var(--accent);
+      opacity: 0.16;
+      animation: drift1 28s ease-in-out infinite alternate;
+    }
+
+    .hero-bg span:nth-child(2) {
+      width: 360px;
+      height: 360px;
+      top: 35%;
+      right: 0%;
+      background: var(--accent2);
+      opacity: 0.14;
+      animation: drift2 34s ease-in-out infinite alternate;
+    }
+
+    .hero-bg span:nth-child(3) {
+      width: 300px;
+      height: 300px;
+      bottom: -120px;
+      left: 35%;
+      background: var(--accent);
+      opacity: 0.10;
+      animation: drift3 22s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift1 {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(50px, 40px) scale(1.12); }
+    }
+
+    @keyframes drift2 {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(-45px, -30px) scale(1.15); }
+    }
+
+    @keyframes drift3 {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(35px, -45px) scale(0.92); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-bg span { animation: none; }
     }
 
     .hero .eyebrow {
@@ -416,13 +480,19 @@
 
 <!-- HERO -->
 <div class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
   <div class="eyebrow">IT Leader · AI Builder · US Air Force Veteran</div>
   <h1>Jason&nbsp; <em>Darrow</em></h1>
   <p class="tagline">
     I don't just manage projects. I build them.<br>
-    20 years delivering software. Recently back to hands-on<br>
-    building, learning AI by doing. The results have been<br>
-    surprising, even to me.
+    I was the developer behind billion-dollar platforms<br>
+    and multi-million dollar programs before I ever<br>
+    managed them. That background is what I bring to<br>
+    AI now. The results have surprised even me.
   </p>
   <div class="hero-cta">
     <a href="#projects" class="btn btn-primary">See the Projects</a>
@@ -432,7 +502,7 @@
   <div class="stats-bar">
     <div class="stat">
       <div class="stat-label">Background</div>
-      <div class="stat-value">20 Years in IT Delivery</div>
+      <div class="stat-value">Billion-Dollar Platform Delivery</div>
     </div>
     <div class="stat">
       <div class="stat-label">Active Projects</div>
@@ -440,7 +510,7 @@
     </div>
     <div class="stat">
       <div class="stat-label">Stack</div>
-      <div class="stat-value">Python · Claude API · Ollama · AWS</div>
+      <div class="stat-value">Python · Next.js · Claude API · SQLite · AWS</div>
     </div>
     <div class="stat">
       <div class="stat-label">Status</div>
@@ -454,7 +524,10 @@
   <div class="section-label">Projects</div>
 
   <!-- PROJECT 1: AI Job Search -->
-  <h2>AI Job Search System</h2>
+  <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 28px;">
+    <h2 style="margin-bottom: 0;">AI Job Search System</h2>
+    <span class="badge badge-complete">Complete</span>
+  </div>
 
   <h3>What I Built</h3>
   <p>
@@ -473,6 +546,11 @@
     to move forward. When I do, Claude selects the best-fit bullets and
     drafts both a tailored resume and a voice-matched cover letter — both
     as editable Word documents I review and refine before anything goes out.
+  </p>
+  <p>
+    Application tracking happens in Notion, not in this pipeline. Every
+    role moves through a tracker I update by hand, status by status,
+    application to offer. Human in the loop, on purpose.
   </p>
 
   <div class="tags">
@@ -587,22 +665,6 @@
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
-    <div class="wave">
-      <div class="wave-num">7</div>
-      <div>
-        <div class="wave-title">Application Tracker</div>
-        <p class="wave-desc">Notion API integration to track applications from submission through offer — synced from the pipeline automatically.</p>
-      </div>
-      <span class="badge badge-planned">Planned</span>
-    </div>
-    <div class="wave">
-      <div class="wave-num">8</div>
-      <div>
-        <div class="wave-title">Expanded Search</div>
-        <p class="wave-desc">Additional job source integrations for broader, fresher listings across more platforms.</p>
-      </div>
-      <span class="badge badge-planned">Planned</span>
-    </div>
   </div>
 </section>
 
@@ -612,88 +674,87 @@
 <!-- PROJECT 2: AI-Assisted GTD -->
 <section id="gtd">
   <div class="section-label">Second Project</div>
-  <h2>AI-Assisted GTD System</h2>
+  <h2>Getting Things Done with AI</h2>
 
   <h3>What I Built</h3>
   <p>
-    A personal operating system powered by local AI — built to replace the external
-    structure that employment provides. Leaving a 20-year career means losing standing
-    meetings, a team, and an Outlook calendar as the heartbeat of the week.
-    This project rebuilds that structure from the inside out.
+    A full-stack personal weekly planner — built from scratch because nothing I tried
+    kept calendar, habits, and weekly goals in one place without a subscription.
+    This runs on a Linux box in my home office and is accessible from any device on the network.
   </p>
   <p>
-    The system runs a local LLM (llama3.1:8b via Ollama) on a Ubuntu machine,
-    pulling open tasks from Notion and live events from Google Calendar to generate
-    a focused morning briefing every day at 6:30 AM. No cloud dependency, no
-    subscription cost — the model runs on a GTX 1080 in my home office. The briefing
-    is delivered as a local HTML page viewable from any device on the network.
-    Grounded in David Allen's GTD methodology and a Notion Ultimate Brain template.
+    The app is an Outlook-style weekly organizer with a full time grid, all-day events,
+    recurring events, and per-category color coding.  Below the calendar sit three weekly
+    planning cards: a free-text Weekly Summary, a Daily Routine habit tracker with
+    checkboxes across all seven days, and three SMART Goals scoped to the current week.
+    All data persists to a local SQLite database via a Next.js API layer.
+    Theme switches between Light and Graphite.  Built with Claude Code.
   </p>
 
-  <div class="tags">
-    <span class="tag">Python 3</span>
-    <span class="tag">Ollama</span>
-    <span class="tag">llama3.1:8b</span>
-    <span class="tag">Google Calendar API</span>
-    <span class="tag">Notion API</span>
-    <span class="tag">GTD</span>
-    <span class="tag">Ubuntu</span>
-    <span class="tag">cron</span>
-    <span class="tag">systemd</span>
+  <div style="display: flex; flex-direction: column; gap: 16px; margin: 32px 0;">
+    <img src="screenshot-gtd-week.png" alt="GTD Weekly Organizer — week view" style="width: 100%; border-radius: 6px; border: 1px solid var(--border);">
+    <img src="screenshot-gtd-planning.png" alt="GTD Weekly Organizer — planning panel" style="width: 100%; border-radius: 6px; border: 1px solid var(--border);">
   </div>
 
-  <a href="https://github.com/darrowj/my-ai-agents" target="_blank" class="github-link">View on GitHub →</a>
+  <div class="tags">
+    <span class="tag">Next.js 16</span>
+    <span class="tag">TypeScript</span>
+    <span class="tag">React</span>
+    <span class="tag">Tailwind CSS</span>
+    <span class="tag">SQLite</span>
+    <span class="tag">Drizzle ORM</span>
+    <span class="tag">PM2</span>
+    <span class="tag">Ubuntu</span>
+    <span class="tag">Claude Code</span>
+  </div>
 
-  <div class="code-block"><span class="comment"># Runs automatically at 6:30 AM via cron</span>
-<span class="cmd">$ python3 morning_briefing.py</span>
-<span class="ok">✓ Fetching tasks from Notion...  5 found</span>
-<span class="ok">✓ Fetching calendar events...   2 found</span>
-<span class="ok">✓ Briefing generated via llama3.1:8b (local GPU)</span>
-<span class="ok">✓ Saved: morning_briefing.html</span>
+  <a href="https://github.com/darrowj/Getting-Things-Done-with-AI" target="_blank" class="github-link">View on GitHub →</a>
 
-<span class="comment"># View from any device on the local network</span>
-<span class="accent">→ http://linux-box:8088/morning_briefing.html</span></div>
+  <div class="code-block"><span class="comment"># Run locally</span>
+<span class="cmd">$ npm run dev</span>
+<span class="ok">✓ Ready in 1305ms</span>
+<span class="accent">→ http://localhost:3000</span>
+
+<span class="comment"># Deploy to Linux server under PM2</span>
+<span class="cmd">$ rsync -av --exclude node_modules --exclude .next \
+    gtd-app/ darrowj@192.168.1.246:~/gtd-app/</span>
+<span class="cmd">$ ssh darrowj@192.168.1.246 \
+    "cd ~/gtd-app && npm install && npm run build && pm2 start npm --name gtd -- start"</span>
+<span class="ok">✓ App running — accessible from any device on the network</span>
+<span class="accent">→ http://192.168.1.246:3000</span></div>
 
   <!-- PROJECT 2 WAVE LOG -->
-  <div class="section-label" style="margin-top: 56px;" id="gtd-waves">Build Log — AI-Assisted GTD</div>
+  <div class="section-label" style="margin-top: 56px;" id="gtd-waves">Build Log — Getting Things Done with AI</div>
   <div class="waves">
     <div class="wave">
       <div class="wave-num">1</div>
       <div>
-        <div class="wave-title">Foundation</div>
-        <p class="wave-desc">Ollama + Open WebUI running locally on Ubuntu. Weekly planner prototype built as interactive HTML. Cursor Remote SSH connected. GitHub repo live.</p>
+        <div class="wave-title">Full Calendar UI + SQLite Persistence</div>
+        <p class="wave-desc">Week view and Day view with time grid (6 AM–10 PM), all-day band, recurring events (daily / weekly on chosen days), overlapping event layout, and per-category color coding.  Event modal with all-day toggle, repeat weekday chips, reminder settings, and "save this occurrence vs. save all" for recurring edits.  Planning panel with Weekly Summary, Daily Routine habit tracker, and SMART Goals — all scoped per week.  Light and Graphite theme toggle.  All data persists to SQLite via Next.js API routes and Drizzle ORM.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
     <div class="wave">
       <div class="wave-num">2</div>
       <div>
-        <div class="wave-title">Morning Briefing Agent</div>
-        <p class="wave-desc">Python agent pulls live Notion tasks and Google Calendar events, generates a plain-English daily briefing via local LLM, delivers as HTML on the local network. Runs automatically every morning via cron.</p>
+        <div class="wave-title">Linux Deploy</div>
+        <p class="wave-desc">Synced to Ubuntu home server, running under PM2 with a startup hook.  Accessible from any device on the local network, live and in daily use.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
     <div class="wave">
       <div class="wave-num">3</div>
       <div>
-        <div class="wave-title">Weekly Schedule Script</div>
-        <p class="wave-desc">Agent pulls the week ahead from Google Calendar and Notion, generates a prioritized weekly plan with suggested time blocks.</p>
+        <div class="wave-title">Integrations</div>
+        <p class="wave-desc">Google Calendar sync to pull live events into the week view.  Notion task pull to surface open next actions alongside the schedule.</p>
       </div>
       <span class="badge badge-planned">Planned</span>
     </div>
     <div class="wave">
       <div class="wave-num">4</div>
       <div>
-        <div class="wave-title">Outlook-Style Weekly View</div>
-        <p class="wave-desc">Visual, color-coded weekly planner populated from live Calendar and Notion data. Green for health, blue for deep work, purple for learning, amber for social, coral for admin.</p>
-      </div>
-      <span class="badge badge-planned">Planned</span>
-    </div>
-    <div class="wave">
-      <div class="wave-num">5</div>
-      <div>
-        <div class="wave-title">Weekly Review Agent</div>
-        <p class="wave-desc">Guides through GTD weekly review steps, surfaces stale projects and missing next actions, optionally writes suggested blocks to Google Calendar.</p>
+        <div class="wave-title">AI Features</div>
+        <p class="wave-desc">Claude API morning briefing integrated into the app.  Weekly review assistant that processes captures and suggests next actions.  SMART goal suggestions based on the week summary.</p>
       </div>
       <span class="badge badge-planned">Planned</span>
     </div>
@@ -705,20 +766,26 @@
   <div class="section-label">Background</div>
   <h2>About Me</h2>
   <p>
-    I spent 20 years building and delivering software — starting as a
-    web application architect at Bank of America, where I built systems
-    responsible for billions in managed assets, and progressing to IT
-    Delivery Manager at Voya Financial overseeing programs from $250K to $3M.
+    I taught myself to code, starting with C-shell scripting, awk and sed,
+    then Perl, while working as an RF technician at CellularOne. That
+    turned into a full stack developer role at Click2Learn.com, building
+    eLearning software for Fortune 1000 clients. From there I became a
+    web application architect at Bank of America, building systems
+    responsible for billions in managed assets. Later I moved into IT
+    Delivery Manager at Voya Financial, overseeing programs from $250K
+    to $3M.
   </p>
   <p>
     Instead of just sending resumes right away, I decided
-    to build the tool I wished existed — an AI system that finds relevant
-    jobs, tailors my resume to each one, and tracks my progress.
-    This site documents that project, and the ones that followed.
+    to build the tool I wished existed, an AI system that finds relevant
+    jobs, tailors my resume to each one, and tracks my progress. That
+    became the first of several projects I'm actively building, including
+    a weekly planner app I run my own schedule on today. This site
+    documents all of them.
   </p>
   <p>
     I'm learning AI by doing, not watching. Every week something new
-    gets built, committed to GitHub, and added to the system.
+    gets built, committed to GitHub, and shipped.
     The results have been genuinely surprising.
   </p>
 
@@ -752,7 +819,7 @@
   <h2>Let's Talk</h2>
   <p>
     I'm currently open to IT Delivery Manager, Program Manager,
-    and AI Operations roles in the Greater Boston area and remote.
+    and AI-Enabled Delivery roles in the Greater Boston area and remote.
   </p>
   <p>
     If you're building something interesting with AI, or know someone
