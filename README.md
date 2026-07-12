@@ -10,8 +10,8 @@ Built as a hands-on learning project to develop real AI engineering skills while
 ## What it does
 
 - **Scrapes job boards** across multiple titles and locations via the JSearch API (OpenWeb Ninja) — captures the full job description for each posting and outputs to `output/job_listings.xlsx` (with dated archive snapshots)
-- **Enriches listings** with company intelligence — industry, size, stability, growth trend, and recent news via web search (DuckDuckGo) and NewsAPI
-- **Generates an HTML report** of shortlisted jobs with company briefs and one-click resume tailor commands
+- **Enriches listings** with company intelligence — industry, size, stability, growth trend, and recent news via web search (DuckDuckGo) and NewsAPI — plus an AI **resume match score** (0–100) and match notes comparing each posting against `master_resume.json`
+- **Generates an HTML report** of shortlisted jobs with company briefs, match score badges, and one-click resume tailor commands
 - **Tailors resumes** using the Claude API — paste the full job description, Claude selects the best matching bullets from a 57-bullet master resume database, rewrites the summary to match
 - **Generates cover letters** using the Claude API — produces a voice-matched cover letter grounded in the same bullets selected for the tailored resume, outputs a submission-ready .docx
 - **Generates Word documents** — reconstructs my resume format with AI-selected bullets, outputs a submission-ready .docx file
@@ -34,11 +34,12 @@ There are two ways to run the pipeline: the **dashboard** (recommended) or the
    → opens the control panel in your browser
 
 3. Work top to bottom through the tabs:
-   Tab 1 Scrape   → run the scraper, watch the live log
-   Tab 2 Review   → mark roles "Interested" right in an editable table
-   Tab 3 Enrich   → pull company intel, read briefs, generate the HTML report
-   Tab 4 Tailor   → pick a role, tailor the resume, generate the .docx
-   Tab 5 Status   → see per-company enrichment / tailored / resume state
+   Tab 1 Scrape        → run the scraper, watch the live log
+   Tab 2 Review        → mark roles "Interested" right in an editable table
+   Tab 3 Enrich        → pull company intel + resume match scores, read briefs, generate the HTML report
+   Tab 4 Tailor        → pick a role, auto-fill the JD, tailor the resume, generate the .docx (cover letter shortcut here too)
+   Tab 5 Status        → per-company enrichment / tailored / resume / cover letter / match score
+   Tab 6 Cover Letter  → generate a cover letter standalone for any role (with or without a tailored resume)
 
 4. Review, edit, export to PDF, submit
 ```
@@ -60,27 +61,30 @@ scripts below, with their output streamed live into the page. See the
 3. Open Excel → mark interesting roles as "Interested"
 
 4. python3 enrich_jobs.py
-   → pulls company intel for Interested rows
-   → generates the HTML report
+   → pulls company intel + resume match scores for Interested rows
 
-5. Open HTML report in browser
-   → read company briefs
+5. python3 report_generator.py
+   → output/job_report_YYYY-MM-DD.html
+
+6. Open HTML report in browser
+   → read company briefs and match scores
    → copy tailor command for roles you want to apply to
 
-6. python3 resume_tailor.py --company "Fidelity" \
-                             --title "Technical Project Delivery Manager"
-   (prompts to paste full job description)
+7. python3 resume_tailor.py --company "Fidelity" \
+                             --title "Technical Project Delivery Manager" \
+                             --description "<paste full JD>"
    → output/tailored_Fidelity.json (match score, selected bullets)
 
-7. python3 resume_generator.py --input output/tailored_Fidelity.json
+8. python3 resume_generator.py --input output/tailored_Fidelity.json
    → personal/Jason_Darrow_Resume_Fidelity.docx
 
-8. python3 cover_letter_generator.py --company "Fidelity" \
-                                       --title "Technical Project Delivery Manager"
-   (prompts to paste full job description — reuses same JD)
+9. python3 cover_letter_generator.py --company "Fidelity" \
+                                       --title "Technical Project Delivery Manager" \
+                                       --description "<paste full JD>"
    → personal/CoverLetter_Fidelity.docx
+   (auto-detects tailored JSON if it exists)
 
-9. Review, edit, export to PDF, submit
+10. Review, edit, export to PDF, submit
 ```
 
 ---
@@ -90,12 +94,13 @@ scripts below, with their output streamed live into the page. See the
 | Tool | Purpose |
 |------|---------|
 | Python 3 | Core language |
-| Claude API (Anthropic) | Resume tailoring and bullet selection |
+| Claude API (Anthropic) | Resume tailoring, cover letters, enrichment match scoring |
 | JSearch API (OpenWeb Ninja) | Job listing search + full job descriptions |
 | NewsAPI | Recent company news headlines |
 | ddgs (DuckDuckGo) | Company background web search |
 | python-docx | Word document generation |
 | pandas + openpyxl | Excel output and enrichment |
+| Streamlit | Dashboard control panel |
 | requests | API calls and HTTP fetching |
 | python-dotenv | Secure API key management |
 | GitHub | Version control and portfolio |
@@ -109,7 +114,7 @@ scripts below, with their output streamed live into the page. See the
 dashboard.py                Streamlit control panel — run the whole pipeline from the browser
 job_scraper.py              Search job boards, output to Excel
 search_config.json          Search preferences — titles, locations, filters (committed)
-enrich_jobs.py              Enrich Interested listings with company intel
+enrich_jobs.py              Enrich Interested listings with company intel + resume match scores
 report_generator.py         Generate HTML report from enriched listings
 resume_tailor.py            AI resume tailoring via Claude API
 resume_generator.py         Generate Word doc from tailored JSON
@@ -125,13 +130,15 @@ index.html                  Portfolio site source
 
 **Master resume as a database** — instead of one static resume, all career experience lives in a JSON file with 57 bullets tagged by skill category and scored by strength. The AI selects the best 5-6 per role rather than showing everything.
 
+**Resume match scoring at enrichment** — during `enrich_jobs.py`, Claude compares `master_resume.json` against each job's full description and stores a 0–100 match score plus brief notes in the Excel. The HTML report and dashboard status tab surface the score so you can prioritize before tailoring.
+
 **Full job descriptions captured at scrape time** — the JSearch scraper stores each posting's full text in the Excel, so resume tailoring and cover letter generation pull the description straight from the spreadsheet with no manual paste for most roles.
 
 **Config-driven search** — search preferences (titles, locations, filters) live in `search_config.json`, committed to GitHub and documented with inline `_comment` fields. Salary floor stays private in `.env` to protect negotiating position.
 
 **Allowlist filtering over blocklist** — rather than maintaining an ever-growing list of titles to exclude, the scraper uses a `require_title_keywords` allowlist. Any result whose title doesn't match is dropped. Eliminates noise without whack-a-mole maintenance.
 
-**Iterative waves** — built in waves (0-6) so each phase produces something useful before moving to the next. No big bang releases.
+**Iterative waves** — built in waves so each phase produced something useful before moving to the next. The core pipeline is complete; future changes are driven by real usage.
 
 **Secrets management** — API keys and salary floor in `.env`, never committed to GitHub.
 
@@ -155,9 +162,10 @@ streamlit run dashboard.py
 |-----|---------------|
 | 1. Scrape | Runs `job_scraper.py` (writes canonical `output/job_listings.xlsx` + archive snapshot) |
 | 2. Review | Edits the `Status` column in-place (`Interested` / `Skip`), saves back to Excel |
-| 3. Enrich | Counts Interested jobs, runs `enrich_jobs.py`, renders company briefs, generates the HTML report |
-| 4. Tailor | Picks one Interested role, auto-fills the job description from the scraped Excel (editable, with manual-paste fallback), runs `resume_tailor.py` and `cover_letter_generator.py`, shows match score and bullets, generates a per-company resume `.docx` and cover letter |
-| 5. Status | Read-only tracker showing per-company enrichment / tailored / resume state from files on disk |
+| 3. Enrich | Counts Interested jobs, runs `enrich_jobs.py` (company intel + resume match scores), renders company briefs, generates the HTML report (download or **Open in Browser**) |
+| 4. Tailor | Picks one Interested role, auto-fills the job description from the scraped Excel (editable fallback), runs `resume_tailor.py`, shows match score and bullets, generates resume `.docx`; optional cover letter shortcut when a tailored JSON exists |
+| 5. Status | Read-only tracker: enrichment, tailored JSON, resume DOCX, cover letter, and match score per Interested role |
+| 6. Cover Letter | Standalone cover letter generation for any role — prefill from Interested jobs or enter company/title/description manually; reuses tailored JSON when available |
 
 A status panel at the top shows total jobs, # Interested, # enriched, # tailored resumes, and the canonical file's last-modified time.
 
@@ -184,26 +192,10 @@ MIN_SALARY=200000
 # Edit search_config.json to set your titles, locations, and filters
 # (documented inline — see _comment fields in the file)
 
-# Run the scraper
+# Run the scraper (or launch the dashboard)
 python3 job_scraper.py
+# streamlit run dashboard.py
 ```
-
----
-
-## Project status
-
-| Wave | Description | Status |
-|------|-------------|--------|
-| 0 | Master resume JSON database | ✅ Complete |
-| 1 | Job scraper — JSearch API (OpenWeb Ninja), config-driven filters, Excel output | ✅ Complete |
-| 2 | AI resume tailoring + Word doc generation | ✅ Complete |
-| 2.5 | Company intelligence enrichment | ✅ Complete |
-| 3 | HTML job report | ✅ Complete |
-| 4 | Portfolio site — jasondarrow.com | ✅ Complete |
-| 5 | Streamlit dashboard — run the full pipeline from the browser | ✅ Complete |
-| 6 | AI cover letter generation — voice-matched, grounded in tailored bullets | ✅ Complete |
-| 7 | Application tracker — SQLite or Notion API integration | 🔜 Planned |
-| 8 | Expanded search — additional job source integrations | 🔜 Planned |
 
 ---
 
