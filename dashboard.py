@@ -1,11 +1,12 @@
 """Streamlit control panel for the AI job search pipeline.
 
-Five tabs map 1:1 to existing scripts:
-    1. Scrape   → job_scraper.py
-    2. Review   → edit Status in the Excel
-    3. Enrich   → enrich_jobs.py + report_generator.py
-    4. Tailor   → resume_tailor.py + resume_generator.py
-    5. Status   → file-derived tracker (seed for the future SQLite tracker)
+Six tabs map to pipeline stages and scripts:
+    1. Scrape        → job_scraper.py
+    2. Review        → edit Status in the Excel
+    3. Enrich        → enrich_jobs.py + report_generator.py
+    4. Tailor        → resume_tailor.py + resume_generator.py (+ cover letter shortcut)
+    5. Status        → file-derived tracker (seed for the future SQLite tracker)
+    6. Cover Letter  → cover_letter_generator.py (standalone)
 
 The dashboard never reads .env directly — keys stay where they belong.
 It also never duplicates pipeline logic; every action is a subprocess call
@@ -209,12 +210,13 @@ st.divider()
 
 # ── Tabs ───────────────────────────────────────────────────────────────────
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "1. Scrape",
     "2. Review",
     "3. Enrich",
     "4. Tailor",
     "5. Status",
+    "6. Cover Letter",
 ])
 
 # ── Tab 1: Scrape ──────────────────────────────────────────────────────────
@@ -636,3 +638,116 @@ with tab5:
                 width="stretch",
                 hide_index=True,
             )
+
+
+# ── Tab 6: Cover Letter ───────────────────────────────────────────────────
+
+with tab6:
+    st.subheader("Generate a cover letter")
+    st.caption(
+        "Runs `cover_letter_generator.py` for any role.  Prefill from an Interested "
+        "job or enter company, title, and description manually.  If a tailored resume "
+        "JSON already exists for this company, it is passed automatically."
+    )
+
+    df = load_job_df()
+    interested_options: list[str] = [""]
+    interested_rows: dict[str, pd.Series] = {}
+
+    if df is not None:
+        if "Status" not in df.columns:
+            df["Status"] = ""
+        interested_cl = df[
+            df["Status"].astype(str).str.strip().str.lower() == "interested"
+        ].copy()
+        for _, r in interested_cl.iterrows():
+            label = f"{r.get('Company', '(unknown)')} — {r.get('Title', '')}".strip(" —")
+            interested_options.append(label)
+            interested_rows[label] = r
+
+    chosen_prefill = st.selectbox(
+        "Prefill from Interested role (optional)",
+        interested_options,
+        format_func=lambda x: "Enter manually" if x == "" else x,
+        key="cl_prefill_pick",
+    )
+
+    # Seed inputs when the user picks a different Interested role.
+    if st.session_state.get("cl_loaded_for") != chosen_prefill:
+        if chosen_prefill and chosen_prefill in interested_rows:
+            row = interested_rows[chosen_prefill]
+            st.session_state["cl_company"] = str(row.get("Company", "")).strip()
+            st.session_state["cl_title"] = (
+                str(row.get("Title", "")).strip() or "Position"
+            )
+            raw_jd = row.get("Job Description", "")
+            try:
+                jd_is_blank = bool(pd.isna(raw_jd))
+            except (TypeError, ValueError):
+                jd_is_blank = False
+            st.session_state["cl_jd_textarea"] = (
+                "" if jd_is_blank else str(raw_jd).strip()
+            )
+        st.session_state["cl_loaded_for"] = chosen_prefill
+
+    company = st.text_input("Company", key="cl_company")
+    title = st.text_input("Title", key="cl_title")
+    jd_text = st.text_area(
+        "Job description",
+        key="cl_jd_textarea",
+        height=240,
+    )
+    jd_clean = jd_text.strip()
+    company_clean = company.strip()
+    title_clean = title.strip()
+
+    cl_ready = bool(company_clean) and bool(title_clean) and len(jd_clean) >= 100
+    if not cl_ready:
+        if not company_clean or not title_clean:
+            st.warning("Company and title are required.")
+        elif len(jd_clean) < 100:
+            st.warning("Job description must be at least 100 characters.")
+
+    slug = safe_company_slug(company_clean)
+    cl_path = PERSONAL_DIR / f"CoverLetter_{slug}.docx"
+    tailored_path = OUTPUT_DIR / f"tailored_{slug}.json"
+
+    col_run, col_dl = st.columns(2)
+    with col_run:
+        if st.button(
+            "Generate Cover Letter",
+            type="primary",
+            disabled=not cl_ready,
+            key="run_cover_letter_tab6",
+        ):
+            cmd = [
+                "python3", "cover_letter_generator.py",
+                "--company", company_clean,
+                "--title", title_clean,
+                "--description", jd_clean,
+                "--output", str(cl_path.relative_to(HERE)),
+            ]
+            if tailored_path.exists():
+                cmd += ["--input", str(tailored_path.relative_to(HERE))]
+            run_script(cmd)
+    with col_dl:
+        if cl_path.exists() and company_clean:
+            with cl_path.open("rb") as f:
+                st.download_button(
+                    f"Download {cl_path.name}",
+                    data=f.read(),
+                    file_name=cl_path.name,
+                    mime=(
+                        "application/vnd.openxmlformats-"
+                        "officedocument.wordprocessingml.document"
+                    ),
+                    key="download_cover_letter_tab6",
+                )
+        else:
+            st.caption("Generate the cover letter to enable download.")
+
+    if tailored_path.exists() and company_clean:
+        st.caption(
+            f"Tailored resume JSON found — bullet selection from "
+            f"`{tailored_path.name}` will be included."
+        )
