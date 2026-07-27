@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 830" width="1040" height="830" role="img" aria-labelledby="ttl dsc">
+<title id="ttl">AI Job Search System architecture</title>
+<desc id="dsc">Inputs on the left feed a four-stage pipeline: discovery, intelligence, tailoring, and document generation. Three amber human review steps sit between the stages. Data files and generated documents appear on the right. A shared AI layer of the Claude API, prompt rules, and output guardrails supports stages two through four.</desc>
+<text x="30" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">INPUTS</text>
+<text x="330" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">PIPELINE  ·  AMBER STEPS ARE MINE</text>
+<text x="778" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">DATA  &amp;  OUTPUTS</text>
+<rect x="330" y="48" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="74.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">1 · Discovery</text>
+<text x="520.0" y="91.0" text-anchor="middle" fill="#e3e3e3" font-size="11">job_scraper.py — filter, dedupe</text>
+<rect x="330" y="136" width="380" height="40" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="161.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">YOU · mark roles Interested</text>
+<rect x="330" y="206" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="232.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">2 · Intelligence</text>
+<text x="520.0" y="249.0" text-anchor="middle" fill="#e3e3e3" font-size="11">enrich_jobs.py — company brief + AI match score 0-100</text>
+<rect x="643.0" y="214" width="58.0" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="672.0" y="226.5" text-anchor="middle" fill="#ffd9d2" font-size="10" font-weight="700" letter-spacing="0.4">Claude</text>
+<rect x="330" y="294" width="380" height="40" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="319.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">YOU · pick a role</text>
+<rect x="330" y="364" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="390.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">3 · Tailoring</text>
+<text x="520.0" y="407.0" text-anchor="middle" fill="#e3e3e3" font-size="11">resume_tailor.py — select + rewrite</text>
+<rect x="643.0" y="372" width="58.0" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="672.0" y="384.5" text-anchor="middle" fill="#ffd9d2" font-size="10" font-weight="700" letter-spacing="0.4">Claude</text>
+<rect x="330" y="452" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="478.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">4 · Documents</text>
+<text x="520.0" y="495.0" text-anchor="middle" fill="#e3e3e3" font-size="11">resume + cover letter generators</text>
+<rect x="643.0" y="460" width="58.0" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="672.0" y="472.5" text-anchor="middle" fill="#ffd9d2" font-size="10" font-weight="700" letter-spacing="0.4">Claude</text>
+<rect x="330" y="540" width="380" height="40" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="565.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">YOU · review, edit, submit</text>
+<rect x="330" y="610" width="380" height="58" rx="8" fill="#333333" stroke="#5a5a5a" stroke-width="1.5"/>
+<text x="520.0" y="636.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Notion tracker</text>
+<text x="520.0" y="653.0" text-anchor="middle" fill="#e3e3e3" font-size="11">Interested → Applied → Interview → Offer</text>
+<line x1="520.0" y1="106.0" x2="520.0" y2="122.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,131.0 516.4,122.0 523.6,122.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="176.0" x2="520.0" y2="192.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,201.0 516.4,192.0 523.6,192.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="264.0" x2="520.0" y2="280.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,289.0 516.4,280.0 523.6,280.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="334.0" x2="520.0" y2="350.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,359.0 516.4,350.0 523.6,350.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="422.0" x2="520.0" y2="438.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,447.0 516.4,438.0 523.6,438.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="510.0" x2="520.0" y2="526.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,535.0 516.4,526.0 523.6,526.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="580.0" x2="520.0" y2="596.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,605.0 516.4,596.0 523.6,596.0" fill="#9aa0a6"/>
+<rect x="30" y="48" width="232" height="58" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="74.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">JSearch API</text>
+<text x="146.0" y="91.0" text-anchor="middle" fill="#e3e3e3" font-size="11">postings + full descriptions</text>
+<line x1="262.0" y1="77.0" x2="316.0" y2="77.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,77.0 316.0,80.6 316.0,73.4" fill="#9aa0a6"/>
+<rect x="30" y="206" width="232" height="58" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="232.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">NewsAPI · DuckDuckGo</text>
+<text x="146.0" y="249.0" text-anchor="middle" fill="#e3e3e3" font-size="11">company background</text>
+<line x1="262.0" y1="235.0" x2="316.0" y2="235.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,235.0 316.0,238.6 316.0,231.4" fill="#9aa0a6"/>
+<rect x="30" y="288" width="232" height="52" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="311.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Manual entry</text>
+<text x="146.0" y="328.0" text-anchor="middle" fill="#e3e3e3" font-size="11">referrals, careers pages</text>
+<line x1="262.0" y1="314.0" x2="316.0" y2="314.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,314.0 316.0,317.6 316.0,310.4" fill="#9aa0a6"/>
+<rect x="30" y="364" width="232" height="58" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
+<text x="146.0" y="390.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">master_resume.json</text>
+<text x="146.0" y="407.0" text-anchor="middle" fill="#e3e3e3" font-size="11">source of truth · 59 bullets</text>
+<line x1="262.0" y1="393.0" x2="316.0" y2="393.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,393.0 316.0,396.6 316.0,389.4" fill="#9aa0a6"/>
+<rect x="778" y="48" width="232" height="58" rx="8" fill="#1e3a8a" stroke="#3355b5" stroke-width="1.5"/>
+<text x="894.0" y="74.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">job_listings.xlsx</text>
+<text x="894.0" y="91.0" text-anchor="middle" fill="#e3e3e3" font-size="11">canonical + dated archive</text>
+<line x1="715.0" y1="77.0" x2="764.0" y2="77.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,77.0 764.0,80.6 764.0,73.4" fill="#9aa0a6"/>
+<rect x="778" y="176" width="232" height="58" rx="8" fill="#2d4a15" stroke="#456f22" stroke-width="1.5"/>
+<text x="894.0" y="202.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">HTML report</text>
+<text x="894.0" y="219.0" text-anchor="middle" fill="#e3e3e3" font-size="11">company briefs + match badges</text>
+<line x1="715.0" y1="235.0" x2="765.0" y2="209.1" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,205.0 766.7,212.3 763.4,205.9" fill="#9aa0a6"/>
+<rect x="778" y="364" width="232" height="58" rx="8" fill="#1e3a8a" stroke="#3355b5" stroke-width="1.5"/>
+<text x="894.0" y="390.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">tailored_COMPANY.json</text>
+<text x="894.0" y="407.0" text-anchor="middle" fill="#e3e3e3" font-size="11">bullets + match score</text>
+<line x1="715.0" y1="393.0" x2="764.0" y2="393.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,393.0 764.0,396.6 764.0,389.4" fill="#9aa0a6"/>
+<rect x="778" y="444" width="232" height="40" rx="8" fill="#2d4a15" stroke="#456f22" stroke-width="1.5"/>
+<text x="894.0" y="469.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Resume .docx</text>
+<line x1="715.0" y1="481.0" x2="764.4" y2="466.5" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,464.0 765.4,470.0 763.4,463.1" fill="#9aa0a6"/>
+<rect x="778" y="494" width="232" height="40" rx="8" fill="#2d4a15" stroke="#456f22" stroke-width="1.5"/>
+<text x="894.0" y="519.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Cover letter .docx</text>
+<line x1="715.0" y1="481.0" x2="765.2" y2="509.5" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,514.0 763.4,512.7 767.0,506.4" fill="#9aa0a6"/>
+<text x="30" y="706" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">SHARED AI LAYER  ·  BEHIND EVERY  CLAUDE  BADGE ABOVE</text>
+<rect x="30" y="720" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="193.0" y="744.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Claude API</text>
+<text x="193.0" y="761.0" text-anchor="middle" fill="#e3e3e3" font-size="11">bullet selection · match scoring</text>
+<rect x="372" y="720" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="535.0" y="744.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Prompt rules</text>
+<text x="535.0" y="761.0" text-anchor="middle" fill="#e3e3e3" font-size="11">voice · anti-AI · grounded in real bullets</text>
+<rect x="714" y="720" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="877.0" y="744.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Guardrails</text>
+<text x="877.0" y="761.0" text-anchor="middle" fill="#e3e3e3" font-size="11">bullet counts · length · page estimate</text>
+<text x="30" y="816" fill="#7c848d" font-size="11.5">Every stage runs from the Streamlit dashboard, or standalone from the command line.  Claude selects and rewords existing experience — it never invents any, and it never sends anything.</text>
+</svg>

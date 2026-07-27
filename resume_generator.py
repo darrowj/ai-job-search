@@ -14,10 +14,83 @@ Usage:
 import argparse
 import copy
 import json
+import math
 import os
 
 from docx import Document
 from docx.oxml.ns import qn
+
+# ── Page-length estimate ───────────────────────────────────────────────────
+# A tailored resume should land on two pages.  Nothing in the pipeline enforces
+# that: resume_tailor.py puts no length budget on the summary or the bullets,
+# so a verbose model response silently produces a three-page resume.
+#
+# Rather than add a heavyweight dependency (converting to PDF just to count
+# pages means every user installs LibreOffice), we estimate from wrapped line
+# counts.  The constants below were calibrated against rendered output from
+# this template — predicted vs. actual line counts agree within one line:
+#
+#     tailored_MIT_AICR.json  → predicted 79, actual 78  (2 pages)
+#     tailored_Citizens.json  → predicted 86, actual 85  (3 pages)
+#     tailored_Lumen.json     → predicted 90, actual 90  (3 pages)
+#
+# This is a warning, not a gate.  The .docx is always written — you edit and
+# review it in Word before sending.  The warning just makes an overlong resume
+# impossible to miss.
+
+CHARS_PER_LINE_BODY   = 105   # full text width
+CHARS_PER_LINE_BULLET = 110   # indented, but a smaller font offsets the indent
+LINES_PER_PAGE        = 40
+TARGET_PAGES          = 2
+
+
+def estimate_line_count(document) -> int:
+    """Estimate how many rendered lines the document occupies."""
+    lines = 0
+    paragraphs = list(document.paragraphs)
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                paragraphs.extend(cell.paragraphs)
+
+    for para in paragraphs:
+        text = para.text.strip()
+        if not text:
+            continue
+        try:
+            is_bullet = para.style.name == "List Paragraph"
+        except Exception:  # noqa: BLE001 — style can be None on odd documents
+            is_bullet = False
+        width = CHARS_PER_LINE_BULLET if is_bullet else CHARS_PER_LINE_BODY
+        lines += max(1, math.ceil(len(text) / width))
+    return lines
+
+
+def report_page_estimate(document) -> None:
+    """Print an estimated page count, loudly if it runs past the target."""
+    lines = estimate_line_count(document)
+    budget = LINES_PER_PAGE * TARGET_PAGES
+    pages = max(1, math.ceil(lines / LINES_PER_PAGE))
+
+    if lines > budget:
+        over = lines - budget
+        print("", flush=True)
+        print("=" * 68, flush=True)
+        print(f"⚠  LENGTH WARNING — this resume is likely {pages} pages, not {TARGET_PAGES}.", flush=True)
+        print(f"   Roughly {over} line(s) over a {TARGET_PAGES}-page layout.", flush=True)
+        print("   Open it in Word and trim before sending.  Usual culprits:", flush=True)
+        print("     • a long tailored_summary (aim for ~650 characters)", flush=True)
+        print("     • long bullets (aim for ~230 characters each)", flush=True)
+        print("     • more Voya bullets than the intended 5", flush=True)
+        print("=" * 68, flush=True)
+    elif lines > budget - 6:
+        print(
+            f"• Length: ~{pages} page(s), close to the {TARGET_PAGES}-page limit "
+            f"({lines}/{budget} lines) — check the last page before sending.",
+            flush=True,
+        )
+    else:
+        print(f"• Length: ~{pages} page(s) ({lines}/{budget} lines).", flush=True)
 
 # ── Args ───────────────────────────────────────────────────────────────────
 
@@ -215,3 +288,6 @@ else:
 
 doc.save(args.output)
 print(f"✓ Resume saved: {args.output}", flush=True)
+
+# Estimate length last so the warning is the final thing on screen.
+report_page_estimate(doc)

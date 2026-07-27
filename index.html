@@ -510,7 +510,7 @@
   <div class="stats-bar">
     <div class="stat">
       <div class="stat-label">Background</div>
-      <div class="stat-value">Billion-Dollar Platform Delivery</div>
+      <div class="stat-value">Financial Services Platform Delivery</div>
     </div>
     <div class="stat">
       <div class="stat-label">Active Projects</div>
@@ -550,16 +550,145 @@
     then I review each listing and mark the roles I want to pursue. For
     those roles, the system pulls company background, news, and a
     Claude-generated match score that compares the job description against
-    my full 57-bullet resume database. I use that score to decide whether
+    my full 59-bullet resume database. I use that score to decide whether
     to move forward. When I do, Claude selects the best-fit bullets and
     drafts both a tailored resume and a voice-matched cover letter — both
     as editable Word documents I review and refine before anything goes out.
+  </p>
+  <p>
+    The best roles rarely come from a job board. They come from a referral
+    or a company careers page. So the tailoring step takes a role from
+    either source — pulled from the scraper, or typed in by hand — and runs
+    the identical pipeline on both.
   </p>
   <p>
     Application tracking happens in Notion, not in this pipeline. Every
     role moves through a tracker I update by hand, status by status,
     application to offer. Human in the loop, on purpose.
   </p>
+
+
+  <h3 style="margin-top:40px;">How It Works</h3>
+  <figure style="margin:20px 0 8px;">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 830" style="width:100%;min-width:720px;height:auto;display:block" role="img" aria-labelledby="arch-ttl arch-dsc">
+<title id="arch-ttl">AI Job Search System architecture</title>
+<desc id="arch-dsc">Inputs on the left feed a four-stage pipeline: discovery, intelligence, tailoring, and document generation. Three amber human review steps sit between the stages. Data files and generated documents appear on the right. A shared AI layer of the Claude API, prompt rules, and output guardrails supports stages two through four.</desc>
+<text x="30" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">INPUTS</text>
+<text x="330" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">PIPELINE  ·  AMBER STEPS ARE MINE</text>
+<text x="778" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">DATA  &amp;  OUTPUTS</text>
+<rect x="330" y="48" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="74.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">1 · Discovery</text>
+<text x="520.0" y="91.0" text-anchor="middle" fill="#e3e3e3" font-size="11">job_scraper.py — filter, dedupe</text>
+<rect x="330" y="136" width="380" height="40" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="161.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">YOU · mark roles Interested</text>
+<rect x="330" y="206" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="232.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">2 · Intelligence</text>
+<text x="520.0" y="249.0" text-anchor="middle" fill="#e3e3e3" font-size="11">enrich_jobs.py — company brief + AI match score 0-100</text>
+<rect x="643.0" y="214" width="58.0" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="672.0" y="226.5" text-anchor="middle" fill="#ffd9d2" font-size="10" font-weight="700" letter-spacing="0.4">Claude</text>
+<rect x="330" y="294" width="380" height="40" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="319.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">YOU · pick a role</text>
+<rect x="330" y="364" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="390.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">3 · Tailoring</text>
+<text x="520.0" y="407.0" text-anchor="middle" fill="#e3e3e3" font-size="11">resume_tailor.py — select + rewrite</text>
+<rect x="643.0" y="372" width="58.0" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="672.0" y="384.5" text-anchor="middle" fill="#ffd9d2" font-size="10" font-weight="700" letter-spacing="0.4">Claude</text>
+<rect x="330" y="452" width="380" height="58" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="478.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">4 · Documents</text>
+<text x="520.0" y="495.0" text-anchor="middle" fill="#e3e3e3" font-size="11">resume + cover letter generators</text>
+<rect x="643.0" y="460" width="58.0" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="672.0" y="472.5" text-anchor="middle" fill="#ffd9d2" font-size="10" font-weight="700" letter-spacing="0.4">Claude</text>
+<rect x="330" y="540" width="380" height="40" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="565.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">YOU · review, edit, submit</text>
+<rect x="330" y="610" width="380" height="58" rx="8" fill="#333333" stroke="#5a5a5a" stroke-width="1.5"/>
+<text x="520.0" y="636.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Notion tracker</text>
+<text x="520.0" y="653.0" text-anchor="middle" fill="#e3e3e3" font-size="11">Interested → Applied → Interview → Offer</text>
+<line x1="520.0" y1="106.0" x2="520.0" y2="122.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,131.0 516.4,122.0 523.6,122.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="176.0" x2="520.0" y2="192.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,201.0 516.4,192.0 523.6,192.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="264.0" x2="520.0" y2="280.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,289.0 516.4,280.0 523.6,280.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="334.0" x2="520.0" y2="350.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,359.0 516.4,350.0 523.6,350.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="422.0" x2="520.0" y2="438.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,447.0 516.4,438.0 523.6,438.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="510.0" x2="520.0" y2="526.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,535.0 516.4,526.0 523.6,526.0" fill="#9aa0a6"/>
+<line x1="520.0" y1="580.0" x2="520.0" y2="596.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,605.0 516.4,596.0 523.6,596.0" fill="#9aa0a6"/>
+<rect x="30" y="48" width="232" height="58" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="74.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">JSearch API</text>
+<text x="146.0" y="91.0" text-anchor="middle" fill="#e3e3e3" font-size="11">postings + full descriptions</text>
+<line x1="262.0" y1="77.0" x2="316.0" y2="77.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,77.0 316.0,80.6 316.0,73.4" fill="#9aa0a6"/>
+<rect x="30" y="206" width="232" height="58" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="232.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">NewsAPI · DuckDuckGo</text>
+<text x="146.0" y="249.0" text-anchor="middle" fill="#e3e3e3" font-size="11">company background</text>
+<line x1="262.0" y1="235.0" x2="316.0" y2="235.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,235.0 316.0,238.6 316.0,231.4" fill="#9aa0a6"/>
+<rect x="30" y="288" width="232" height="52" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="311.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Manual entry</text>
+<text x="146.0" y="328.0" text-anchor="middle" fill="#e3e3e3" font-size="11">referrals, careers pages</text>
+<line x1="262.0" y1="314.0" x2="316.0" y2="314.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,314.0 316.0,317.6 316.0,310.4" fill="#9aa0a6"/>
+<rect x="30" y="364" width="232" height="58" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
+<text x="146.0" y="390.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">master_resume.json</text>
+<text x="146.0" y="407.0" text-anchor="middle" fill="#e3e3e3" font-size="11">source of truth · 59 bullets</text>
+<line x1="262.0" y1="393.0" x2="316.0" y2="393.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="325.0,393.0 316.0,396.6 316.0,389.4" fill="#9aa0a6"/>
+<rect x="778" y="48" width="232" height="58" rx="8" fill="#1e3a8a" stroke="#3355b5" stroke-width="1.5"/>
+<text x="894.0" y="74.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">job_listings.xlsx</text>
+<text x="894.0" y="91.0" text-anchor="middle" fill="#e3e3e3" font-size="11">canonical + dated archive</text>
+<line x1="715.0" y1="77.0" x2="764.0" y2="77.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,77.0 764.0,80.6 764.0,73.4" fill="#9aa0a6"/>
+<rect x="778" y="176" width="232" height="58" rx="8" fill="#2d4a15" stroke="#456f22" stroke-width="1.5"/>
+<text x="894.0" y="202.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">HTML report</text>
+<text x="894.0" y="219.0" text-anchor="middle" fill="#e3e3e3" font-size="11">company briefs + match badges</text>
+<line x1="715.0" y1="235.0" x2="765.0" y2="209.1" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,205.0 766.7,212.3 763.4,205.9" fill="#9aa0a6"/>
+<rect x="778" y="364" width="232" height="58" rx="8" fill="#1e3a8a" stroke="#3355b5" stroke-width="1.5"/>
+<text x="894.0" y="390.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">tailored_COMPANY.json</text>
+<text x="894.0" y="407.0" text-anchor="middle" fill="#e3e3e3" font-size="11">bullets + match score</text>
+<line x1="715.0" y1="393.0" x2="764.0" y2="393.0" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,393.0 764.0,396.6 764.0,389.4" fill="#9aa0a6"/>
+<rect x="778" y="444" width="232" height="40" rx="8" fill="#2d4a15" stroke="#456f22" stroke-width="1.5"/>
+<text x="894.0" y="469.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Resume .docx</text>
+<line x1="715.0" y1="481.0" x2="764.4" y2="466.5" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,464.0 765.4,470.0 763.4,463.1" fill="#9aa0a6"/>
+<rect x="778" y="494" width="232" height="40" rx="8" fill="#2d4a15" stroke="#456f22" stroke-width="1.5"/>
+<text x="894.0" y="519.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Cover letter .docx</text>
+<line x1="715.0" y1="481.0" x2="765.2" y2="509.5" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="773.0,514.0 763.4,512.7 767.0,506.4" fill="#9aa0a6"/>
+<text x="30" y="706" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">SHARED AI LAYER  ·  BEHIND EVERY  CLAUDE  BADGE ABOVE</text>
+<rect x="30" y="720" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="193.0" y="744.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Claude API</text>
+<text x="193.0" y="761.0" text-anchor="middle" fill="#e3e3e3" font-size="11">bullet selection · match scoring</text>
+<rect x="372" y="720" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="535.0" y="744.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Prompt rules</text>
+<text x="535.0" y="761.0" text-anchor="middle" fill="#e3e3e3" font-size="11">voice · anti-AI · grounded in real bullets</text>
+<rect x="714" y="720" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="877.0" y="744.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Guardrails</text>
+<text x="877.0" y="761.0" text-anchor="middle" fill="#e3e3e3" font-size="11">bullet counts · length · page estimate</text>
+<text x="30" y="816" fill="#7c848d" font-size="11.5">Every stage runs from the Streamlit dashboard, or standalone from the command line.  Claude selects and rewords existing experience — it never invents any, and it never sends anything.</text>
+</svg>
+    </div>
+    <figcaption style="color:var(--muted);font-size:13px;margin-top:10px;">
+      Four stages, three points where I take over. The amber steps are mine.
+    </figcaption>
+  </figure>
+
+  <h3 style="margin-top:40px;">The Dashboard</h3>
+  <figure style="margin:20px 0 8px;">
+    <img src="job_search_dashboard.png"
+         alt="Job Search Dashboard, Review tab, showing scraped roles ready to be marked Interested"
+         style="width:100%;height:auto;display:block;border-radius:8px;border:1px solid rgba(255,255,255,0.12);">
+    <figcaption style="color:var(--muted);font-size:13px;margin-top:10px;">
+      The Review tab. 177 roles scraped, 13 marked Interested, 3 resumes tailored.
+      Every stage runs from a tab in this panel, with script output streamed live into the page.
+    </figcaption>
+  </figure>
 
   <div class="tags">
     <span class="tag">Python 3</span>
@@ -598,6 +727,7 @@
 <span class="cmd">$ python3 resume_generator.py \
     --input output/tailored_Fidelity.json</span>
 <span class="ok">✓ Resume saved: Jason_Darrow_Resume_Fidelity.docx</span>
+<span class="ok">• Length: ~2 page(s) (76/80 lines).</span>
 
 <span class="comment"># Generate voice-matched cover letter</span>
 <span class="cmd">$ python3 cover_letter_generator.py \
@@ -613,7 +743,7 @@
       <div class="wave-num">0</div>
       <div>
         <div class="wave-title">Resume Database</div>
-        <p class="wave-desc">Structured master resume in JSON — 57 bullets tagged by skill, strength scored, ready for AI selection.</p>
+        <p class="wave-desc">Structured master resume in JSON — 59 bullets tagged by skill, strength scored, ready for AI selection.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>
@@ -670,6 +800,14 @@
       <div>
         <div class="wave-title">AI Cover Letter Generator</div>
         <p class="wave-desc">Claude API generates a voice-matched cover letter grounded in the same bullets selected for the tailored resume. Writing rules, anti-AI guardrails, and before/after examples embedded directly in the prompt. Outputs a submission-ready .docx.</p>
+      </div>
+      <span class="badge badge-complete">Complete</span>
+    </div>
+    <div class="wave">
+      <div class="wave-num">7</div>
+      <div>
+        <div class="wave-title">Off-Pipeline Roles &amp; Output Guardrails</div>
+        <p class="wave-desc">Tailoring now accepts a role typed in by hand, not just one found by the scraper, and optionally writes it into the tracker so both sources land in one view. Added validation on the model's own output: bullet-count overruns are trimmed, over-length summaries and bullets are reported, and the generator estimates rendered page count and warns before a three-page resume goes out. The page estimate uses wrapped line counts calibrated against real output rather than a PDF conversion, so it adds no dependencies.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>

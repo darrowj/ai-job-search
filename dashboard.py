@@ -5,6 +5,8 @@ Six tabs map to pipeline stages and scripts:
     2. Review        → edit Status in the Excel
     3. Enrich        → enrich_jobs.py + report_generator.py
     4. Tailor        → resume_tailor.py + resume_generator.py (+ cover letter shortcut)
+                       Two sources: an Interested role from the Excel, or a
+                       hand-entered role found outside the pipeline.
     5. Status        → file-derived tracker (seed for the future SQLite tracker)
     6. Cover Letter  → cover_letter_generator.py (standalone)
 
@@ -144,6 +146,76 @@ def count_tailored() -> int:
 
 def safe_company_slug(name: str) -> str:
     return (name or "").strip().replace(" ", "_")
+
+
+# Column order job_scraper.py writes. A manually added role uses the same
+# schema so the Excel stays uniform whether a row came from JSearch or a
+# posting Jason found on his own.
+SCRAPER_COLUMNS = [
+    "Search Term", "Search Location", "Title", "Company", "Location",
+    "Salary", "Posted", "Type", "Remote", "Publisher", "Apply URL",
+    "Job Description", "Date Found", "Status", "Notes",
+]
+
+
+def add_manual_job(
+    company: str,
+    title: str,
+    description: str,
+    location: str = "",
+    url: str = "",
+) -> str:
+    """Add (or refresh) a hand-entered role in the canonical Excel as Interested.
+
+    Dedupes on (Company, Title) — the same key job_scraper.py uses — so
+    re-tailoring the same role updates the existing row instead of piling up
+    duplicates. Returns "added" or "updated".
+    """
+    df = load_job_df()
+    if df is None:
+        df = pd.DataFrame(columns=SCRAPER_COLUMNS)
+    for col in SCRAPER_COLUMNS:
+        if col not in df.columns:
+            df[col] = ""
+
+    match = (
+        df["Company"].astype(str).str.strip().str.casefold() == company.casefold()
+    ) & (
+        df["Title"].astype(str).str.strip().str.casefold() == title.casefold()
+    )
+
+    if match.any():
+        idx = df.index[match][0]
+        df.loc[idx, "Status"] = "Interested"
+        df.loc[idx, "Job Description"] = description
+        if location:
+            df.loc[idx, "Location"] = location
+        if url:
+            df.loc[idx, "Apply URL"] = url
+        save_job_df(df)
+        return "updated"
+
+    row = {c: "" for c in df.columns}
+    row.update({
+        "Search Term":     "Manual entry",
+        "Search Location": location,
+        "Title":           title,
+        "Company":         company,
+        "Location":        location,
+        "Salary":          "Not listed",
+        "Posted":          "Unknown",
+        "Type":            "Unknown",
+        "Remote":          "Unknown",
+        "Publisher":       "Manual",
+        "Apply URL":       url,
+        "Job Description": description,
+        "Date Found":      _date.today().isoformat(),
+        "Status":          "Interested",
+        "Notes":           "Added manually from the dashboard",
+    })
+    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+    save_job_df(df)
+    return "added"
 
 
 # ── Session state ──────────────────────────────────────────────────────────
@@ -400,187 +472,275 @@ with tab3:
 
 with tab4:
     st.subheader("Tailor a resume for a single role")
-    df = load_job_df()
-    if df is None:
-        st.info("No job file yet — scrape first (Tab 1).")
-    else:
-        if "Status" not in df.columns:
-            df["Status"] = ""
-        interested = df[
-            df["Status"].astype(str).str.strip().str.lower() == "interested"
-        ].copy().reset_index(drop=True)
 
-        if len(interested) == 0:
-            st.info("Mark some jobs as Interested in Tab 2 first.")
+    # Two ways in. "Pipeline role" is the scraper path. "Manual entry" covers
+    # everything found outside it — a referral, a company careers page, a
+    # recruiter email. Both converge on the same company/title/description
+    # trio, which is all resume_tailor.py has ever needed.
+    tailor_source = st.radio(
+        "Where did this role come from?",
+        ["Pipeline role", "Manual entry"],
+        horizontal=True,
+        key="tailor_source",
+    )
+
+    company = ""
+    title = ""
+    jd_clean = ""
+    manual_location = ""
+    manual_url = ""
+    add_to_tracker = False
+    inputs_ok = False
+
+    # ── Source A: a role already marked Interested in the Excel ────────────
+    if tailor_source == "Pipeline role":
+        df = load_job_df()
+        if df is None:
+            st.info(
+                "No job file yet — scrape first (Tab 1), or switch to "
+                "**Manual entry** above."
+            )
         else:
-            # Build labels for the dropdown; keep Company in session for memory across tabs.
-            labels = [
-                f"{r.get('Company', '(unknown)')} — {r.get('Title', '')}".strip(" —")
-                for _, r in interested.iterrows()
-            ]
-            companies = [str(c) for c in interested["Company"].fillna("").astype(str).tolist()]
+            if "Status" not in df.columns:
+                df["Status"] = ""
+            interested = df[
+                df["Status"].astype(str).str.strip().str.lower() == "interested"
+            ].copy().reset_index(drop=True)
 
-            default_idx = 0
-            if st.session_state.selected_company in companies:
-                default_idx = companies.index(st.session_state.selected_company)
-
-            chosen_label = st.selectbox(
-                "Pick an Interested role",
-                labels,
-                index=default_idx,
-                key="tailor_company_pick",
-            )
-            row = interested.iloc[labels.index(chosen_label)]
-            company = str(row["Company"]).strip()
-            title = str(row.get("Title", "")).strip() or "Position"
-            url = str(row.get("Apply URL", "")).strip()
-            st.session_state.selected_company = company
-
-            # JSearch now stores the full posting in the "Job Description"
-            # column, so most roles are hands-free: pick the role and the
-            # description below auto-fills, then it's passed straight to both
-            # resume_tailor.py and cover_letter_generator.py via --description.
-            # The textarea stays editable and is the fallback for any role that
-            # was scraped without a description.
-            raw_jd = row.get("Job Description", "")
-            try:
-                jd_is_blank = bool(pd.isna(raw_jd))
-            except (TypeError, ValueError):
-                jd_is_blank = False
-            excel_jd = "" if jd_is_blank else str(raw_jd).strip()
-
-            # Seed the textarea from the Excel description whenever the selected
-            # role changes. Setting the widget's session_state value *before*
-            # the widget is created is the supported way to programmatically
-            # populate it; guarding on the label keeps later manual edits.
-            ta_key = "tailor_jd_textarea"
-            if st.session_state.get("jd_loaded_for") != chosen_label:
-                st.session_state[ta_key] = excel_jd
-                st.session_state["jd_loaded_for"] = chosen_label
-
-            if excel_jd:
-                st.caption("Job description auto-filled from the scraped Excel. Edit if needed.")
-            else:
-                st.caption("No description was scraped for this role — paste one below.")
-            if url:
-                st.caption(f"Posting: [{url}]({url})")
-
-            jd_text = st.text_area(
-                "Job description (used for both the resume and cover letter)",
-                key=ta_key,
-                height=240,
-            )
-            jd_clean = jd_text.strip()
-
-            cmd = ["python3", "resume_tailor.py", "--company", company, "--title", title]
-            if jd_clean:
-                cmd += ["--description", jd_clean]
-
-            ready = bool(jd_clean)
-            if not ready:
-                st.warning("Provide a job description above to tailor the resume.")
-
-            if st.button("Tailor Resume", type="primary", disabled=not ready, key="run_tailor"):
-                run_script(cmd)
-                st.session_state.last_tailor_company = company
-
-            # Show tailored output if it exists for the selected company.
-            slug = safe_company_slug(company)
-            tailored_path = OUTPUT_DIR / f"tailored_{slug}.json"
-            if tailored_path.exists():
-                try:
-                    data = json.loads(tailored_path.read_text())
-                except Exception as e:  # noqa: BLE001
-                    st.error(f"Could not read {tailored_path.name}: {e}")
-                    data = {}
-
-                st.markdown(f"### Tailored output — **{company}**")
-                score = data.get("match_score")
-                if score is not None:
-                    st.metric("Match score", f"{score} / 100")
-                key_skills = data.get("key_skills") or []
-                if key_skills:
-                    st.write("**Key skills selected:** " + ", ".join(key_skills))
-                summary = data.get("tailored_summary") or ""
-                if summary:
-                    with st.expander("Tailored summary"):
-                        st.write(summary)
-                bullets = data.get("selected_bullets") or []
-                if bullets:
-                    with st.expander(f"Selected bullets ({len(bullets)})"):
-                        for b in bullets:
-                            st.markdown(
-                                f"- *{b.get('company','')} — {b.get('title','')}* — "
-                                f"{b.get('bullet','')}"
-                            )
-
-                docx_path = PERSONAL_DIR / f"Jason_Darrow_Resume_{slug}.docx"
-                col_g, col_d = st.columns(2)
-                with col_g:
-                    if st.button("Generate Word Doc", key="run_resume_gen"):
-                        run_script([
-                            "python3", "resume_generator.py",
-                            "--input", str(tailored_path.relative_to(HERE)),
-                            "--output", str(docx_path.relative_to(HERE)),
-                        ])
-                with col_d:
-                    if docx_path.exists():
-                        with docx_path.open("rb") as f:
-                            st.download_button(
-                                f"Download {docx_path.name}",
-                                data=f.read(),
-                                file_name=docx_path.name,
-                                mime=(
-                                    "application/vnd.openxmlformats-"
-                                    "officedocument.wordprocessingml.document"
-                                ),
-                            )
-                    else:
-                        st.caption("Generate the Word doc to enable download.")
-
-                # ── Cover letter ──────────────────────────────────────────
-                st.divider()
-                st.markdown("#### Cover Letter")
-                st.caption(
-                    "Uses the same job description above (auto-filled from the "
-                    "scraped Excel when available) plus the tailored bullet "
-                    "selection for this role."
+            if len(interested) == 0:
+                st.info(
+                    "Mark some jobs as Interested in Tab 2 first, or switch to "
+                    "**Manual entry** above."
                 )
+            else:
+                # Build labels for the dropdown; keep Company in session for memory across tabs.
+                labels = [
+                    f"{r.get('Company', '(unknown)')} — {r.get('Title', '')}".strip(" —")
+                    for _, r in interested.iterrows()
+                ]
+                companies = [str(c) for c in interested["Company"].fillna("").astype(str).tolist()]
 
-                cl_path = PERSONAL_DIR / f"CoverLetter_{slug}.docx"
-                col_cl, col_cld = st.columns(2)
-                jd_for_cl = jd_clean
-                with col_cl:
-                    cl_ready = bool(jd_for_cl)
-                    if not cl_ready:
-                        st.caption("Provide a job description above to enable cover letter generation.")
-                    if st.button(
-                        "Generate Cover Letter",
-                        key="run_cover_letter",
-                        disabled=not cl_ready,
-                    ):
-                        run_script([
-                            "python3", "cover_letter_generator.py",
-                            "--company",     company,
-                            "--title",       title,
-                            "--description", jd_for_cl,
-                            "--input",       str(tailored_path.relative_to(HERE)),
-                            "--output",      str(cl_path.relative_to(HERE)),
-                        ])
-                with col_cld:
-                    if cl_path.exists():
-                        with cl_path.open("rb") as f:
-                            st.download_button(
-                                f"Download {cl_path.name}",
-                                data=f.read(),
-                                file_name=cl_path.name,
-                                mime=(
-                                    "application/vnd.openxmlformats-"
-                                    "officedocument.wordprocessingml.document"
-                                ),
-                            )
-                    else:
-                        st.caption("Generate the cover letter to enable download.")
+                default_idx = 0
+                if st.session_state.selected_company in companies:
+                    default_idx = companies.index(st.session_state.selected_company)
+
+                chosen_label = st.selectbox(
+                    "Pick an Interested role",
+                    labels,
+                    index=default_idx,
+                    key="tailor_company_pick",
+                )
+                row = interested.iloc[labels.index(chosen_label)]
+                company = str(row["Company"]).strip()
+                title = str(row.get("Title", "")).strip() or "Position"
+                url = str(row.get("Apply URL", "")).strip()
+                st.session_state.selected_company = company
+
+                # JSearch now stores the full posting in the "Job Description"
+                # column, so most roles are hands-free: pick the role and the
+                # description below auto-fills, then it's passed straight to both
+                # resume_tailor.py and cover_letter_generator.py via --description.
+                # The textarea stays editable and is the fallback for any role that
+                # was scraped without a description.
+                raw_jd = row.get("Job Description", "")
+                try:
+                    jd_is_blank = bool(pd.isna(raw_jd))
+                except (TypeError, ValueError):
+                    jd_is_blank = False
+                excel_jd = "" if jd_is_blank else str(raw_jd).strip()
+
+                # Seed the textarea from the Excel description whenever the selected
+                # role changes. Setting the widget's session_state value *before*
+                # the widget is created is the supported way to programmatically
+                # populate it; guarding on the label keeps later manual edits.
+                ta_key = "tailor_jd_textarea"
+                if st.session_state.get("jd_loaded_for") != chosen_label:
+                    st.session_state[ta_key] = excel_jd
+                    st.session_state["jd_loaded_for"] = chosen_label
+
+                if excel_jd:
+                    st.caption("Job description auto-filled from the scraped Excel. Edit if needed.")
+                else:
+                    st.caption("No description was scraped for this role — paste one below.")
+                if url:
+                    st.caption(f"Posting: [{url}]({url})")
+
+                jd_text = st.text_area(
+                    "Job description (used for both the resume and cover letter)",
+                    key=ta_key,
+                    height=240,
+                )
+                jd_clean = jd_text.strip()
+
+                inputs_ok = bool(jd_clean)
+                if not inputs_ok:
+                    st.warning("Provide a job description above to tailor the resume.")
+
+    # ── Source B: a role found outside the pipeline ────────────────────────
+    else:
+        st.caption(
+            "For roles found outside the scraper — a referral, a careers page, "
+            "a recruiter email.  Paste the posting and it runs through the same "
+            "tailoring, Word doc, and cover letter steps."
+        )
+
+        company = st.text_input("Company", key="manual_company").strip()
+        title = st.text_input("Title", key="manual_title").strip()
+
+        col_loc, col_url = st.columns(2)
+        with col_loc:
+            manual_location = st.text_input("Location (optional)", key="manual_location").strip()
+        with col_url:
+            manual_url = st.text_input("Posting URL (optional)", key="manual_url").strip()
+
+        jd_clean = st.text_area(
+            "Job description (used for both the resume and cover letter)",
+            key="manual_jd_textarea",
+            height=240,
+        ).strip()
+
+        add_to_tracker = st.checkbox(
+            "Add this role to the job tracker as Interested",
+            value=True,
+            key="manual_add_tracker",
+            help=(
+                "Writes the role into output/job_listings.xlsx so it appears in "
+                "Tab 5 next to scraped roles.  Re-tailoring the same role updates "
+                "that row instead of adding a duplicate."
+            ),
+        )
+
+        missing = []
+        if not company:
+            missing.append("company")
+        if not title:
+            missing.append("title")
+        if len(jd_clean) < 100:
+            missing.append("a job description of at least 100 characters")
+        inputs_ok = not missing
+        if missing:
+            st.warning("Still needed: " + ", ".join(missing) + ".")
+
+    # ── Shared: tailor, Word doc, cover letter ─────────────────────────────
+    # Everything below is source-agnostic — it only needs company, title, and
+    # the description, so both paths get identical downstream behavior.
+    if company and title:
+        if st.button("Tailor Resume", type="primary", disabled=not inputs_ok, key="run_tailor"):
+            if tailor_source == "Manual entry" and add_to_tracker:
+                try:
+                    outcome = add_manual_job(
+                        company, title, jd_clean, manual_location, manual_url
+                    )
+                    st.success(f"Job tracker {outcome}: **{company} — {title}** (Interested)")
+                except Exception as e:  # noqa: BLE001
+                    st.warning(f"Could not update the job tracker: {e}")
+
+            rc = run_script([
+                "python3", "resume_tailor.py",
+                "--company", company,
+                "--title", title,
+                "--description", jd_clean,
+            ])
+            if rc == 0:
+                st.session_state.last_tailor_company = company
+                st.session_state.selected_company = company
+
+        # Show tailored output if it exists for the selected company.
+        slug = safe_company_slug(company)
+        tailored_path = OUTPUT_DIR / f"tailored_{slug}.json"
+        if tailored_path.exists():
+            try:
+                data = json.loads(tailored_path.read_text())
+            except Exception as e:  # noqa: BLE001
+                st.error(f"Could not read {tailored_path.name}: {e}")
+                data = {}
+
+            st.markdown(f"### Tailored output — **{company}**")
+            score = data.get("match_score")
+            if score is not None:
+                st.metric("Match score", f"{score} / 100")
+            key_skills = data.get("key_skills") or []
+            if key_skills:
+                st.write("**Key skills selected:** " + ", ".join(key_skills))
+            summary = data.get("tailored_summary") or ""
+            if summary:
+                with st.expander("Tailored summary"):
+                    st.write(summary)
+            bullets = data.get("selected_bullets") or []
+            if bullets:
+                with st.expander(f"Selected bullets ({len(bullets)})"):
+                    for b in bullets:
+                        st.markdown(
+                            f"- *{b.get('company','')} — {b.get('title','')}* — "
+                            f"{b.get('bullet','')}"
+                        )
+
+            docx_path = PERSONAL_DIR / f"Jason_Darrow_Resume_{slug}.docx"
+            col_g, col_d = st.columns(2)
+            with col_g:
+                if st.button("Generate Word Doc", key="run_resume_gen"):
+                    run_script([
+                        "python3", "resume_generator.py",
+                        "--input", str(tailored_path.relative_to(HERE)),
+                        "--output", str(docx_path.relative_to(HERE)),
+                    ])
+            with col_d:
+                if docx_path.exists():
+                    with docx_path.open("rb") as f:
+                        st.download_button(
+                            f"Download {docx_path.name}",
+                            data=f.read(),
+                            file_name=docx_path.name,
+                            mime=(
+                                "application/vnd.openxmlformats-"
+                                "officedocument.wordprocessingml.document"
+                            ),
+                        )
+                else:
+                    st.caption("Generate the Word doc to enable download.")
+
+            # ── Cover letter ──────────────────────────────────────────────
+            st.divider()
+            st.markdown("#### Cover Letter")
+            st.caption(
+                "Uses the same job description above plus the tailored bullet "
+                "selection for this role."
+            )
+
+            cl_path = PERSONAL_DIR / f"CoverLetter_{slug}.docx"
+            col_cl, col_cld = st.columns(2)
+            jd_for_cl = jd_clean
+            with col_cl:
+                cl_ready = bool(jd_for_cl)
+                if not cl_ready:
+                    st.caption("Provide a job description above to enable cover letter generation.")
+                if st.button(
+                    "Generate Cover Letter",
+                    key="run_cover_letter",
+                    disabled=not cl_ready,
+                ):
+                    run_script([
+                        "python3", "cover_letter_generator.py",
+                        "--company",     company,
+                        "--title",       title,
+                        "--description", jd_for_cl,
+                        "--input",       str(tailored_path.relative_to(HERE)),
+                        "--output",      str(cl_path.relative_to(HERE)),
+                    ])
+            with col_cld:
+                if cl_path.exists():
+                    with cl_path.open("rb") as f:
+                        st.download_button(
+                            f"Download {cl_path.name}",
+                            data=f.read(),
+                            file_name=cl_path.name,
+                            mime=(
+                                "application/vnd.openxmlformats-"
+                                "officedocument.wordprocessingml.document"
+                            ),
+                        )
+                else:
+                    st.caption("Generate the cover letter to enable download.")
 
 
 # ── Tab 5: Status / Tracker ───────────────────────────────────────────────

@@ -5,9 +5,9 @@
       "email": "Jason@JasonDarrow.com",
       "location": "Milford, MA",
       "website": "jasondarrow.com",
-      "linkedin": "linkedin.com/in/jasondarrow",
+      "linkedin": "linkedin.com/in/jason-w-darrow",
       "github": "github.com/darrowj",
-      "title": "IT Delivery Manager | AI Project Builder"
+      "title": "IT Leader | Program & Project Delivery | Vendor & Portfolio Management | IT Governance"
     },
     "summaries": [
       {
@@ -25,6 +25,18 @@
         "target": "Technical Manager / Engineering Manager",
         "text": "IT leader with a developer foundation — architect, designer, and developer turned technical team manager. Experienced leading teams of business analysts, developers, and contractors through full SDLC. Managed 14-member teams, oversaw enterprise-scale applications, and delivered solutions supporting billions in managed assets."
       }
+    ],
+    "core_competencies": [
+      "Program & Project Delivery",
+      "Budget Forecasting & Estimation",
+      "Vendor & Third-Party Risk Management",
+      "IT Governance & Intake",
+      "Release & Change Management",
+      "Stakeholder Management",
+      "Cross-Functional Team Leadership",
+      "Resource & Capacity Planning",
+      "Risk & Compliance",
+      "Retirement & Wealth Platforms"
     ],
     "key_contributions": [
       "IT Lead for a business project overseeing 30 application teams with a $2M+ budget",
@@ -77,7 +89,7 @@
       {
         "id": "exp002",
         "company": "Bank of America",
-        "title": "Service Delivery Consultant / Tech Team Manager",
+        "title": "IT Service Delivery Consultant",
         "dates": "February 2012 – October 2018",
         "role_description": "Served as application manager supporting different lines of business while overseeing multiple financial and regulatory risk aligned applications. Managed a team of business analysts and developers to support both BAU and Initiative efforts.",
         "bullets": [
@@ -90,7 +102,9 @@
           { "id": "b029", "text": "Worked with Jira to facilitate the Agile process across projects, managing backlogs, sprints, and delivery tracking.", "tags": ["agile", "jira", "scrum", "tools", "delivery"], "strength": 7 },
           { "id": "b030", "text": "Supported all interactions with enterprise infrastructure, enterprise architecture, and Level 1 and 2 support teams across applications.", "tags": ["enterprise-architecture", "infrastructure", "support", "coordination"], "strength": 7 },
           { "id": "b031", "text": "Application Manager that helped implement and support the Metadata Management Portal for data governance and regulatory compliance.", "tags": ["data-management", "metadata", "regulatory-compliance", "application-management"], "strength": 8 },
-          { "id": "b055", "text": "Supported Data Management applications for regulatory compliance using Agile methodologies, providing critical metadata insights that helped business leaders identify redundant data capture and storage processes, improve data quality, and enhance governance across commercial banking operations.", "tags": ["data-management", "metadata", "regulatory-compliance", "agile", "governance", "commercial-banking"], "strength": 9, "notes": "Professional writer rewrite of b031 — adds business impact, Agile context, and commercial banking specificity" }
+          { "id": "b055", "text": "Supported Data Management applications for regulatory compliance using Agile methodologies, providing critical metadata insights that helped business leaders identify redundant data capture and storage processes, improve data quality, and enhance governance across commercial banking operations.", "tags": ["data-management", "metadata", "regulatory-compliance", "agile", "governance", "commercial-banking"], "strength": 9, "notes": "Professional writer rewrite of b031 — adds business impact, Agile context, and commercial banking specificity" },
+          { "id": "b056", "text": "Supervised a 14-member team of business analysts and developers, making hiring decisions that improved team performance and delivery consistency.", "tags": ["people-management", "hiring", "team-building", "leadership"], "strength": 9, "notes": "Coach rewrite of b023 (July 2026 FINAL) — condensed, outcome-focused" },
+          { "id": "b057", "text": "Facilitated annual planning sessions with business partners and delivered projects from $250K to $1.5M.", "tags": ["planning", "budget", "delivery", "business-alignment"], "strength": 8, "notes": "Coach rewrite of b026 (July 2026 FINAL) — condensed for space" }
         ]
       },
       {
@@ -103,13 +117,15 @@
           { "id": "b032", "text": "Engaged with the Client Onboarding program to implement a document management solution using the Google Search appliance.", "tags": ["document-management", "onboarding", "implementation", "technical"], "strength": 7 },
           { "id": "b033", "text": "Partnered with the Know Your Customer (KYC) program completing multiple projects to create a front end portal for business partners.", "tags": ["KYC", "compliance", "front-end", "portal", "delivery"], "strength": 8 },
           { "id": "b034", "text": "Implemented a new frontend portal for the Party to Account program to drive efficiency and streamline processes.", "tags": ["front-end", "portal", "process-improvement", "delivery"], "strength": 7 },
-          { "id": "b035", "text": "Provided hands-on coding support when needed to help projects meet delivery timelines.", "tags": ["technical", "development", "hands-on", "delivery"], "strength": 6 }
+          { "id": "b035", "text": "Provided hands-on coding support when needed to help projects meet delivery timelines.", "tags": ["technical", "development", "hands-on", "delivery"], "strength": 6 },
+          { "id": "b058", "text": "Delivered Client Onboarding and Know Your Customer (KYC) initiatives, including document management and front-end portal solutions.", "tags": ["KYC", "onboarding", "compliance", "portal", "delivery"], "strength": 8, "notes": "Coach merge of b032 + b033 (July 2026 FINAL)" },
+          { "id": "b059", "text": "Implemented new front-end portals, streamlining business processes and improving operational efficiency.", "tags": ["front-end", "portal", "process-improvement", "delivery"], "strength": 7, "notes": "Coach rewrite of b034 (July 2026 FINAL) — grammar corrected from PDF" }
         ]
       },
       {
         "id": "exp004",
         "company": "Bank of America",
-        "title": "Web Application Architect",
+        "title": "Lead Application Developer / Technical Lead",
         "dates": "February 2001 – August 2008",
         "role_description": "Operated as senior developer for an Internet facing web based asset management system built on the Spring Framework, Hibernate and AJAX for the UI.",
         "bullets": [
@@ -122,8 +138,8 @@
       },
       {
         "id": "exp005",
-        "company": "Click2Learn.com",
-        "title": "Senior Developer",
+        "company": "Clicktolearn.com",
+        "title": "Full Stack Web Developer",
         "dates": "February 2000 – January 2001",
         "role_description": "Acted as senior developer for Custom Services Group providing eLearning software development services for Fortune 1000 companies.",
         "bullets": [
@@ -151,11 +167,24 @@
         "github": "github.com/darrowj/ai-job-search",
         "description": "Built an AI-powered job search agent that scrapes job boards, filters by criteria, tailors resumes and cover letters using the Claude API, and tracks application progress through a full pipeline.",
         "bullets": [
-          "Built end-to-end AI-powered job search and resume personalization system that scrapes job postings via the Adzuna API, enriches company and role intelligence, and dynamically tailors resume using the Claude AI by selecting optimal content from a scored 53-bullet master resume library.",
-          "Engineered for accuracy, trust, and maintainability through configuration files, secure variables management via .env file, and a human-in-the-loop control layer using AI-assistance without hallucination or fabrication of experience."
+          "Built end-to-end AI-powered job search system that scrapes job postings via the JSearch API, enriches company and role intelligence with AI-generated resume match scoring, and dynamically tailors resumes and cover letters using the Claude API by selecting optimal content from a scored 59-bullet master resume library.",
+          "Engineered for accuracy, trust, and maintainability through configuration files, secure variables management via .env file, and a human-in-the-loop control layer using AI-assistance without hallucination or fabrication of experience.",
+          "Operated through a Streamlit dashboard that runs the full pipeline (scrape, enrich, report, tailor, generate) from the browser."
         ],
         "tags": ["python", "llm", "claude-api", "automation", "ai", "agents"],
-        "status": "In Progress - Wave 2 Complete"
+        "status": "Complete through Wave 6 - scraper, enrichment, AI match scoring, HTML reports, dashboard, resume tailoring, cover letters"
+      },
+      {
+        "id": "proj002",
+        "name": "AI Weekly Organizer with Daily Brief",
+        "github": "github.com/darrowj/Getting-Things-Done-with-AI",
+        "description": "Full-stack personal organization system (portfolio project #2): Next.js weekly planner with an AI-generated morning brief, self-hosted on a Linux server.",
+        "bullets": [
+          "Built a full-stack weekly planner (calendar, recurring events, habit tracking, weekly goals) with Next.js, TypeScript, and SQLite, deployed to a self-hosted Linux server with PM2 and disciplined database migration and backup practices.",
+          "Automated a daily morning brief that aggregates Google Calendar, Gmail, and Notion through API integrations and uses a locally hosted LLM (Llama 3.1 via Ollama) to prioritize the day, generated on a weekday cron schedule."
+        ],
+        "tags": ["nextjs", "typescript", "sqlite", "ollama", "local-llm", "full-stack", "self-hosted", "automation", "ai"],
+        "status": "Live on home LAN - planner, daily brief with cron, email and networking filters.  Planned: calendar sync into grid, reminder delivery"
       }
     ],
     "education": [
@@ -169,9 +198,9 @@
       }
     ],
     "certifications": [
-      { "name": "Project Management Professional (PMP)", "valid": "October 2018 – October 2026", "status": "active" },
-      { "name": "Certified ScrumMaster (CSM)", "valid": "January 2018 – January 2026", "status": "active" },
-      { "name": "Retirement Income Certified Professional (RICP)", "valid": "April 2022 – December 2025", "status": "active" },
+      { "name": "Project Management Professional (PMP)", "valid": "October 2018 – October 2027", "status": "active", "notes": "36.5 PDUs still needed for renewal as of July 2026" },
+      { "name": "Certified ScrumMaster (CSM)", "valid": "January 2018 – January 2028", "status": "active" },
+      { "name": "Retirement Income Certified Professional (RICP)", "valid": "April 2022 – December 2026", "status": "active" },
       { "name": "AWS Certified Solutions Architect – Associate", "valid": "Expired 2019", "status": "expired", "notes": "Active renewal planned" }
     ],
     "military": {
@@ -185,9 +214,9 @@
       "bjj_notes": "Brazilian Jiu-Jitsu Black Belt — reflects long-term discipline, resilience, and commitment to continuous improvement"
     },
     "metadata": {
-      "last_updated": "2026-06-13",
-      "version": 3,
-      "source_resume": "Darrow Jason FINAL resume.docx",
+      "last_updated": "2026-07-23",
+      "version": 4,
+      "source_resume": "Darrow Jason FINAL resume.pdf (coach revision, July 2026)",
       "target_roles": ["IT Delivery Manager", "Program Manager", "Technical Program Manager", "AI Operations Manager", "Digital Transformation Lead", "Service Delivery Manager"]
     }
   }

@@ -10,6 +10,10 @@ personal/
 # Personal context / AI session files
 context/
 
+# Pasted job descriptions — working files, often contain rate/comp details
+*_jd.txt
+*_JD.txt
+
 # Python cache
 __pycache__/
 *.pyc

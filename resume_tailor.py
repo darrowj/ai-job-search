@@ -136,6 +136,100 @@ Return your response in this exact JSON format:
     json_str = response_text[start:end]
     result = json.loads(json_str)
 
+    return validate_selection(result)
+
+
+# ── Post-parse validation ─────────────────────────────────────────────────
+# The prompt above asks for exactly 5 Voya bullets and 2-3 from Bank of
+# America, but a prompt is a request, not a constraint — the model overshoots.
+# One observed run returned 8 Voya bullets, which resume_generator.py dutifully
+# wrote into the document and pushed the resume to three pages with nothing
+# flagging it.  These checks make that visible and correct the one case that
+# reliably breaks the layout.
+
+MAX_VOYA_BULLETS   = 5
+BOA_BULLET_RANGE   = (2, 3)
+# Both length ceilings are set just above the longest values seen in a
+# confirmed 2-page resume (tailored_MIT_AICR.json: 625-char summary, longest
+# bullet 227 chars).  Set them any tighter and the check fires on known-good
+# output, which is the fastest way to train yourself to ignore warnings.
+MAX_SUMMARY_CHARS  = 650
+MAX_BULLET_CHARS   = 230
+
+
+def validate_selection(result):
+    """Warn on anything that will blow the two-page layout; trim Voya to 5.
+
+    Only the Voya overshoot is corrected automatically — it is the one that
+    directly drives page count, and the intended number is unambiguous.
+    Everything else is reported so you can judge it in review.
+    """
+    bullets = result.get("selected_bullets", []) or []
+
+    def is_voya(b):
+        return "voya" in str(b.get("company", "")).lower()
+
+    def is_boa(b):
+        return "bank of america" in str(b.get("company", "")).lower()
+
+    voya  = [b for b in bullets if is_voya(b)]
+    boa   = [b for b in bullets if is_boa(b)]
+    other = [b for b in bullets if not is_voya(b) and not is_boa(b)]
+
+    warnings = []
+
+    # 1. Voya count — the one we fix, because the target is unambiguous.
+    if len(voya) > MAX_VOYA_BULLETS:
+        dropped = voya[MAX_VOYA_BULLETS:]
+        voya = voya[:MAX_VOYA_BULLETS]
+        warnings.append(
+            f"Claude returned {len(dropped) + MAX_VOYA_BULLETS} Voya bullets; "
+            f"trimmed to {MAX_VOYA_BULLETS}. Dropped:"
+        )
+        for b in dropped:
+            warnings.append(f"    - {b.get('bullet', '')[:90]}...")
+        result["selected_bullets"] = voya + boa + other
+    elif len(voya) < MAX_VOYA_BULLETS:
+        warnings.append(
+            f"Only {len(voya)} Voya bullet(s) returned (expected {MAX_VOYA_BULLETS})."
+        )
+
+    # 2. BoA count — reported, not corrected. Which two to keep is a judgment call.
+    lo, hi = BOA_BULLET_RANGE
+    if boa and not (lo <= len(boa) <= hi):
+        warnings.append(
+            f"{len(boa)} Bank of America bullets returned (expected {lo}-{hi})."
+        )
+
+    # 3. Length budget — the other driver of a three-page resume.
+    summary_len = len(result.get("tailored_summary", "") or "")
+    if summary_len > MAX_SUMMARY_CHARS:
+        warnings.append(
+            f"Summary is {summary_len} chars (target ≤ {MAX_SUMMARY_CHARS}) — "
+            f"about {(summary_len - MAX_SUMMARY_CHARS) // 105 + 1} extra line(s)."
+        )
+
+    long_bullets = [
+        b for b in result.get("selected_bullets", [])
+        if len(b.get("bullet", "")) > MAX_BULLET_CHARS
+    ]
+    if long_bullets:
+        warnings.append(
+            f"{len(long_bullets)} bullet(s) over {MAX_BULLET_CHARS} chars:"
+        )
+        for b in long_bullets:
+            warnings.append(
+                f"    - {len(b.get('bullet', ''))} chars: {b.get('bullet', '')[:70]}..."
+            )
+
+    if warnings:
+        print("", flush=True)
+        print("─" * 68, flush=True)
+        print("Selection review:", flush=True)
+        for w in warnings:
+            print(f"  ⚠ {w}" if not w.startswith("    ") else w, flush=True)
+        print("─" * 68, flush=True)
+
     return result
 
 # ── Main ──────────────────────────────────────────────────────────────────
