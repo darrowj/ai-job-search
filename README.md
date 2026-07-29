@@ -247,6 +247,17 @@ index.html                  Portfolio site source
 
 ---
 
+## License
+
+MIT.  See [LICENSE](LICENSE).
+
+Take the ideas.  The bullet-scoring approach, the human-in-the-loop checkpoints,
+and the output guardrails are the parts worth stealing.  The resume data itself
+is not in this repo, so you will need to build your own `master_resume.json`
+against the schema the scripts expect.
+
+---
+
 ## About
 
 Built by **Jason W. Darrow** — IT Delivery Manager, US Air Force veteran, BJJ
