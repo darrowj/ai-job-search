@@ -29,6 +29,8 @@ from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from dotenv import load_dotenv
 
+import voice
+
 load_dotenv()
 
 # ── Context files ────────────────────────────────────────────────────────────
@@ -43,27 +45,40 @@ def _load(path):
 ABOUT_ME      = _load("context/AboutMe.md")
 CAREER_HISTORY = _load("context/CareerHistory.md")
 
+# Identity and portfolio projects come from master_resume.json, not from
+# hardcoded prose in this file.  Hardcoding is how "Adzuna API" survived in
+# every generated cover letter for six weeks after the scraper moved to
+# JSearch, and how a wrong LinkedIn URL shipped on every letter sent.
+try:
+    with open("master_resume.json") as _f:
+        MASTER = json.load(_f)
+except FileNotFoundError:
+    MASTER = {}
+
+IDENTITY = MASTER.get("identity", {})
+PROJECTS = MASTER.get("projects", [])
+
+
+def _projects_block():
+    """Current portfolio projects, straight from the master resume."""
+    if not PROJECTS:
+        return "(no portfolio projects on file)"
+    out = []
+    for p in PROJECTS:
+        out.append(f"- {p.get('name','')}: {p.get('description','')}")
+        if p.get("github"):
+            out.append(f"  Repo: {p['github']}")
+    return "\n".join(out)
+
 # ── Voice and anti-AI rules baked into every prompt ─────────────────────────
 
-VOICE_RULES = """
-JASON'S WRITING VOICE — apply every rule without exception:
+VOICE_RULES = voice.voice_rules() + """
 
-1. Double space after periods.  Two spaces, not one.  Always.
-2. No em dashes or hyphens used as pauses or separators.  Use parentheses,
-   commas, or rewrite the sentence instead.  Hyphens inside compound words
-   (cross-functional, multi-million-dollar) are fine.
-3. Short sentences.  One idea per sentence.  If a sentence runs long, break it.
-4. BANNED words and phrases — never use these:
-   progressive, leveraging, synergy, results-driven, proven track record,
-   passionate about, excited to, dynamic, innovative, strategic thinker,
-   seeking to utilize, spearheading, impactful, looking to bring my expertise,
-   seasoned professional, extensive background, I am writing to express,
-   I would be a great fit, I am the ideal candidate, thrilled, delighted.
-5. Give the reason, not just the claim.  Specifics carry the weight.  Numbers
-   and context make the case.  "I built an aircraft residual calculator
-   supporting $1.2B in business" beats "I have strong technical skills."
-6. Direct and confident, not boastful.  State facts.  Let outcomes speak.
-7. First person (I, my) is correct for a cover letter.
+COVER-LETTER-SPECIFIC RULES:
+
+- First person (I, my) is correct for a cover letter.
+- Additional banned phrases: looking to bring my expertise, I am writing to
+  express, I would be a great fit, I am the ideal candidate, thrilled, delighted.
 
 ANTI-AI RULES — the letter must not feel AI-generated:
 - NEVER open with "I am excited to apply", "I am writing to express my interest",
@@ -137,8 +152,14 @@ def generate_cover_letter(company, title, job_description, tailored_data=None):
             for b in bullets:
                 bullet_context += f"  [{b.get('company','')}] {b.get('bullet','')}\n"
         if key_skills:
+            # These are ATS-style labels, not English.  Left unguarded, Claude
+            # drops them into prose verbatim: one letter shipped "the RAID
+            # discipline," which Jason would never say out loud.
             bullet_context += (
-                f"\nKEY SKILLS THAT MATCH THIS ROLE: {', '.join(key_skills)}"
+                f"\nKEY SKILLS THAT MATCH THIS ROLE: {', '.join(key_skills)}\n"
+                "These are keyword labels for a resume, NOT phrases for a letter.  "
+                "Use them to decide WHAT to write about.  Never paste one into a "
+                "sentence, and never use an acronym from this list in the prose."
             )
 
     client = anthropic.Anthropic()
@@ -153,6 +174,9 @@ You must write in his voice and follow every rule below exactly.
 
 --- CAREER HISTORY ---
 {CAREER_HISTORY}
+
+--- PORTFOLIO PROJECTS (the only AI work you may cite) ---
+{_projects_block()}
 {bullet_context}
 
 --- THE JOB ---
@@ -183,12 +207,21 @@ Paragraph 2 (proof):
   Keep sentences short.  Each sentence = one fact or one outcome.
 
 Paragraph 3 (what else Jason brings):
-  The AI project angle: Jason built an AI-powered job search system using the
-  Claude API and Adzuna API.  He did it to learn AI by doing.  Mention this
-  only if it adds genuine value for the role — don't force it.
+  The AI angle.  Jason has built and shipped two AI projects, listed under
+  PORTFOLIO PROJECTS above.  Use those descriptions as the source of truth for
+  what he built and which tools he used.  Do NOT name a tool, API, or framework
+  that does not appear there.
+  Keep the project description SHORT.  Two sentences at most across both
+  projects combined.  The point is that he builds working software with AI, not
+  a feature tour.  Reference both projects only when both add something; one
+  well-chosen project beats two listed.
+  Say WHY he built them: to learn AI by building with it, not by reading about it.
+  Mention this paragraph only if it adds genuine value for the role.
   His Air Force discipline and delivery mindset if relevant.
-  Why he is looking now (Voya layoff 5/4/2026 — his role was eliminated, not
-  performance).  Frame it matter-of-factly, one sentence, if at all.
+  Why he is looking now: his role at Voya was eliminated in June 2026 as part of
+  a layoff, not for performance.  Say JUNE 2026.  Never say May.  (He was
+  notified in May; the role ended 6/15/2026.  June is the fact that matters.)
+  Frame it matter-of-factly, one sentence, if at all.
 
 Paragraph 4 (close):
   A specific, confident ask.  Reference {company} by name.
@@ -202,7 +235,29 @@ Paragraph 4 (close):
         messages=[{"role": "user", "content": prompt}]
     )
 
-    return message.content[0].text.strip()
+    body = message.content[0].text.strip()
+
+    # The prompt asks for the voice rules.  This enforces the ones that can be
+    # enforced.  Same lesson as resume_tailor.py: the first version of this fix
+    # was prompt-only, and the very next letter still came back with an em dash.
+    cleaned = []
+    notes   = []
+    for i, para in enumerate(re.split(r"\n{2,}", body), start=1):
+        fixed, _ = voice.sanitize(para)
+        cleaned.append(fixed)
+        notes += voice.audit(fixed, f"Paragraph {i}")
+
+    body = "\n\n".join(cleaned)
+
+    if notes:
+        print("", flush=True)
+        print("─" * 68, flush=True)
+        print("Voice review (fix these before sending):", flush=True)
+        for n in notes:
+            print(f"  ⚠ {n}", flush=True)
+        print("─" * 68, flush=True)
+
+    return body
 
 # ── Word document builder ────────────────────────────────────────────────────
 
@@ -231,8 +286,15 @@ def build_docx(company, title, letter_body, output_path):
     # ── Name header ─────────────────────────────────────────────────────────
     _para("JASON W. DARROW", bold=True, size=14,
           align=WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
+    # Pulled from master_resume.json so it can never drift from the resume
+    # again.  The hardcoded value here was linkedin.com/in/jasondarrow, which
+    # is not Jason's profile — it went out on every letter until 7/27.
     _para(
-        "774-573-8354  |  Jason@JasonDarrow.com  |  linkedin.com/in/jasondarrow",
+        "  |  ".join([
+            IDENTITY.get("phone",    "774-573-8354"),
+            IDENTITY.get("email",    "Jason@JasonDarrow.com"),
+            IDENTITY.get("linkedin", "linkedin.com/in/jason-w-darrow"),
+        ]),
         size=10, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12,
     )
 

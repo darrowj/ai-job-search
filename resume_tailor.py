@@ -6,6 +6,8 @@ import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
+import voice
+
 # Load API keys from .env
 load_dotenv()
 
@@ -84,8 +86,10 @@ def tailor_resume(job_title, job_description):
     client = anthropic.Anthropic()
 
     prompt = f"""
-You are an expert resume writer. I will give you a master resume in JSON 
-format and a job description. Your job is to:
+You are helping Jason Darrow tailor his own resume.  Everything you write goes
+out under his name, so it has to sound like him, not like a resume template and
+not like an AI.  I will give you his master resume in JSON format and a job
+description.  Your job is to:
 
 1. Read the job description carefully and identify the top 5-6 required
    skills and experiences
@@ -93,9 +97,22 @@ format and a job description. Your job is to:
    - Voya Financial (most recent role): select exactly 5 bullets
    - Bank of America roles: select 2-3 bullets total across all BoA titles
    - Do not include bullets from older roles (Click2Learn, etc.)
-3. Lightly adjust the wording of bullets to mirror the job description
-   language — but never invent experience or change facts
-4. Return a tailored resume summary and the selected bullets in JSON format
+3. SELECT, do not rewrite.  Return each bullet's text from the master resume
+   VERBATIM unless the job description gives you a concrete reason to change a
+   word.  The master bullets were written by a professional resume writer and
+   already sound like Jason.  If you must edit, change the smallest number of
+   words that does the job (swap a term for the JD's term, drop a clause that
+   is irrelevant to this role).  Do not restructure a sentence you are only
+   lightly editing.  Rewriting every bullet is the failure mode here.
+4. Write the tailored summary from the closest-matching summary profile in the
+   master resume, adjusted for this role.  Same rule: edit, do not replace.
+5. Return a tailored resume summary and the selected bullets in JSON format
+
+LENGTH BUDGET (this resume must fit on two pages):
+- tailored_summary: 650 characters maximum
+- each bullet: 230 characters maximum
+
+{voice.voice_rules(resume_mode=True)}
 
 MASTER RESUME:
 {json.dumps(master_resume, indent=2)}
@@ -155,6 +172,20 @@ BOA_BULLET_RANGE   = (2, 3)
 # output, which is the fastest way to train yourself to ignore warnings.
 MAX_SUMMARY_CHARS  = 650
 MAX_BULLET_CHARS   = 230
+
+
+def _normalize(text):
+    """Whitespace- and dash-insensitive form, for verbatim comparison."""
+    text = (text or "").replace("—", ",").replace("–", ",")
+    return " ".join(text.replace(",", " ").split()).lower()
+
+
+def _master_bullet_texts():
+    return {
+        _normalize(b.get("text", ""))
+        for exp in master_resume.get("experience", [])
+        for b in exp.get("bullets", [])
+    }
 
 
 def validate_selection(result):
@@ -221,6 +252,42 @@ def validate_selection(result):
             warnings.append(
                 f"    - {len(b.get('bullet', ''))} chars: {b.get('bullet', '')[:70]}..."
             )
+
+    # 4. Voice — em dashes, AI tells, banned words, undersold years.
+    # Run AFTER the length checks so the char counts above reflect what Claude
+    # actually returned.  sanitize() only ever shortens or leaves alone.
+    voice_notes = []
+
+    summary = result.get("tailored_summary", "") or ""
+    cleaned, changed = voice.sanitize(summary)
+    if changed:
+        result["tailored_summary"] = cleaned
+    voice_notes += voice.audit(cleaned, "Summary")
+
+    verbatim = _master_bullet_texts()
+    rewritten = 0
+    for i, b in enumerate(result.get("selected_bullets", []), start=1):
+        text = b.get("bullet", "") or ""
+        cleaned, changed = voice.sanitize(text)
+        if changed:
+            b["bullet"] = cleaned
+        voice_notes += voice.audit(cleaned, f"Bullet {i}")
+        if _normalize(cleaned) not in verbatim:
+            rewritten += 1
+
+    if voice_notes:
+        warnings.append("Voice check:")
+        warnings += [f"    - {n}" for n in voice_notes]
+
+    # How much did Claude actually rewrite?  High counts mean it ignored the
+    # "select, do not rewrite" instruction and you are shipping its prose
+    # instead of your resume writer's.
+    total = len(result.get("selected_bullets", []))
+    if total and rewritten > total // 2:
+        warnings.append(
+            f"{rewritten} of {total} bullets differ from the master resume text.  "
+            f"Claude rewrote more than it selected — reread them before sending."
+        )
 
     if warnings:
         print("", flush=True)
