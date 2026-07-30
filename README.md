@@ -8,7 +8,7 @@ Built by Jason Darrow · [jasondarrow.com](https://jasondarrow.com) · [LinkedIn
 
 ## Why I built this
 
-I was laid off in June 2026 after 10+ years in IT delivery.  I needed a job, and I
+I was laid off in June 2026 after working as an IT delivery manager.  I needed a job, and I
 needed to learn AI engineering.  This project is both.
 
 The job search itself is the problem I solved.  Tailoring a resume to each posting
