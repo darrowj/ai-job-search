@@ -210,6 +210,84 @@ for para in doc.paragraphs:
 else:
     print("⚠ Summary paragraph not found — check SUMMARY_ANCHOR", flush=True)
 
+# ── 1b. Rewrite the Core Competencies band ────────────────────────────────
+# This band was static template text on every resume ever generated -- Dell,
+# MIT, Nitto and Intact all shipped the same ten phrases.  resume_tailor.py has
+# produced a per-role key_skills list since Wave 2 and nothing ever wrote it to
+# the document, so the densest keyword real estate on the page said the same
+# thing to every employer.
+#
+# It is also where a technical line now goes.  The template has no skills
+# section at all, which meant a posting asking for cloud, GitHub or DevOps had
+# nowhere on the page those words could legitimately appear -- the reason the
+# Intact resume could not pass a requirements screen no matter which bullets
+# were selected.
+
+COMPETENCY_HEADING = "Core Competencies"
+COMPETENCY_END     = "Professional Experience"
+COMPETENCIES_PER_LINE = 3
+
+
+def band_lines(tailored_json):
+    """Build the replacement text lines for the competency band."""
+    comps = tailored_json.get("tailored_competencies") or []
+    lines = [
+        " | ".join(comps[i:i + COMPETENCIES_PER_LINE])
+        for i in range(0, len(comps), COMPETENCIES_PER_LINE)
+    ]
+    skills = tailored_json.get("technical_skills") or []
+    if skills:
+        lines.append("Technical: " + " | ".join(skills))
+    return [ln for ln in lines if ln.strip()]
+
+
+new_lines = band_lines(tailored)
+
+if not new_lines:
+    print("• Core Competencies: no tailored competencies in JSON — template text kept", flush=True)
+else:
+    in_band = False
+    band_paras = []
+    for para in doc.paragraphs:
+        txt = para.text.strip()
+        if txt == COMPETENCY_HEADING:
+            in_band = True
+            continue
+        if in_band:
+            if txt == COMPETENCY_END:
+                break
+            if txt:
+                band_paras.append(para)
+
+    if not band_paras:
+        print("⚠ Core Competencies band not found — check COMPETENCY_HEADING", flush=True)
+    else:
+        n_existing, n_new = len(band_paras), len(new_lines)
+        for i, para in enumerate(band_paras):
+            if i < n_new:
+                replace_para_text(para, new_lines[i])
+            else:
+                remove_para(para)
+
+        if n_new > n_existing:
+            # Clone the last band paragraph for the overflow lines so the new
+            # rows inherit the band's centring, font and spacing.
+            template_elem = band_paras[-1]._element
+            last_elem = template_elem
+            for text in new_lines[n_existing:]:
+                new_p = copy.deepcopy(template_elem)
+                set_xml_para_text(new_p, text)
+                last_elem.addnext(new_p)
+                last_elem = new_p
+
+        n_comps = len(tailored.get("tailored_competencies") or [])
+        n_skills = len(tailored.get("technical_skills") or [])
+        print(
+            f"✓ Core Competencies rewritten: {n_comps} competencies"
+            + (f" + {n_skills} technical skill(s)" if n_skills else " (no technical line)"),
+            flush=True,
+        )
+
 # ── 2. Replace Voya Financial bullets ─────────────────────────────────────
 # Collect the tailored Voya bullets from the JSON.
 

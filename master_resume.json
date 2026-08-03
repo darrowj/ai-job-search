@@ -38,6 +38,31 @@
     "Risk & Compliance",
     "Retirement & Wealth Platforms"
   ],
+  "competency_pool": [
+    "Program & Project Delivery",
+    "Budget Forecasting & Estimation",
+    "Vendor & Third-Party Risk Management",
+    "IT Governance & Intake",
+    "Release & Change Management",
+    "Stakeholder Management",
+    "Cross-Functional Team Leadership",
+    "Resource & Capacity Planning",
+    "Risk & Compliance",
+    "Retirement & Wealth Platforms",
+    "Team Leadership & Supervision",
+    "Hiring & Team Development",
+    "Performance Management",
+    "Escalation & Issue Resolution",
+    "Application Management",
+    "Software Development Lifecycle (SDLC)",
+    "Agile & Waterfall Delivery",
+    "Business & Technical Liaison",
+    "Portfolio Management",
+    "Process Improvement",
+    "Regulatory & Audit Support",
+    "AI & Automation in Delivery",
+    "Release & Deployment Management"
+  ],
   "key_contributions": [
     "IT Lead for a business project overseeing 30 application teams with a $2M+ budget",
     "Diligently manage and oversee budgets and planning on projects from $250K to $3M.",
@@ -430,6 +455,7 @@
             "team-leadership",
             "delivery"
           ],
+          "strength": 8,
           "supersedes": [
             "b017"
           ],
@@ -598,11 +624,12 @@
             "application-management",
             "commercial-banking"
           ],
+          "strength": 9,
           "supersedes": [
             "b031",
             "b055"
           ],
-          "note": "Named-system version of b031/b055.  Confirm exact portal name with Jason."
+          "note": "Named-system version of b031/b055.  Portal name confirmed by Jason 7/29: the real system was the Data Management Portal, and its purpose was managing metadata.  b031 renamed it 'Metadata Management Portal' to hit a keyword for one posting; this version keeps the real name and carries 'metadata' twice in the description instead."
         }
       ]
     },
@@ -750,6 +777,18 @@
             "risk-management"
           ],
           "strength": 8
+        },
+        {
+          "id": "b060",
+          "text": "Built SOAP web services to WSDL and XSD contracts, connecting leasing applications to backend data systems.",
+          "tags": [
+            "web-services",
+            "soa",
+            "integration",
+            "technical",
+            "api"
+          ],
+          "strength": 7
         }
       ]
     },
@@ -819,7 +858,8 @@
       "Budget Management",
       "Release Management",
       "Change Management",
-      "Scope Management"
+      "Scope Management",
+      "Production Support & Monitoring"
     ],
     "methodology": [
       "Agile",
@@ -828,7 +868,8 @@
       "Iterative",
       "SDLC",
       "ITSM",
-      "ITIL"
+      "ITIL",
+      "DevOps (Release & Deployment)"
     ],
     "technical": [
       "Java",
@@ -841,7 +882,10 @@
       "JavaScript",
       "HTML",
       "CSS",
-      "ASP"
+      "ASP",
+      "Web Services (SOAP/WSDL)",
+      "XSD",
+      "Service-Oriented Architecture (SOA)"
     ],
     "tools": [
       "Jira",
@@ -861,7 +905,9 @@
     ],
     "platforms": [
       "AWS",
-      "GitHub"
+      "GitHub",
+      "Linux",
+      "Ubuntu"
     ],
     "domain": [
       "Financial Services",
@@ -972,6 +1018,7 @@
       "AI Operations Manager",
       "Digital Transformation Lead",
       "Service Delivery Manager"
-    ]
+    ],
+    "bullet_count": 62
   }
 }

@@ -479,7 +479,7 @@
 <nav>
   <a href="#" class="logo">Jason Darrow</a>
   <ul>
-    <li><a href="#projects">Projects</a></li>
+    <li><a href="#gtd">Projects</a></li>
     <li><a href="#waves">Progress</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -497,13 +497,13 @@
   <h1>Jason&nbsp; <em>Darrow</em></h1>
   <p class="tagline">
     I don't just manage projects. I build them.<br>
-    I was the developer behind billion-dollar platforms<br>
-    and multi-million dollar programs before I ever<br>
-    managed them. That background is what I bring to<br>
-    AI now. The results have surprised even me.
+    Before I ran delivery, I wrote the code. Platforms<br>
+    that carried billions in managed assets. Programs<br>
+    with budgets from $250K to $3M. The projects below<br>
+    are what I am doing with that background now.
   </p>
   <div class="hero-cta">
-    <a href="#projects" class="btn btn-primary">See the Projects</a>
+    <a href="#gtd" class="btn btn-primary">See the Projects</a>
     <a href="https://github.com/darrowj" target="_blank" class="btn btn-secondary">GitHub →</a>
     <a href="https://linkedin.com/in/jason-w-darrow" target="_blank" class="btn btn-secondary">LinkedIn →</a>
   </div>
@@ -528,10 +528,238 @@
 </div>
 
 <!-- PROJECTS -->
-<section id="projects">
+<!-- PROJECT 1: AI-Assisted GTD -->
+<section id="gtd">
   <div class="section-label">Projects</div>
+  <h2>Getting Things Done with AI</h2>
 
-  <!-- PROJECT 1: AI Job Search -->
+  <h3>What I Built</h3>
+  <p>
+    A full-stack personal weekly planner — built from scratch because nothing I tried
+    kept calendar, habits, and weekly goals in one place without a subscription.
+    This runs on a Linux box in my home office and is accessible from any device on the network.
+  </p>
+  <p>
+    The app is an Outlook-style weekly organizer with a full time grid, all-day events,
+    recurring events, and per-category color coding.  Below the calendar sit three weekly
+    planning cards: a free-text Weekly Summary, a Daily Routine habit tracker with
+    checkboxes across all seven days, and three SMART Goals scoped to the current week.
+    All data persists to a local SQLite database via a Next.js API layer.
+    Theme switches between Light and Graphite.  The design spec came out of a
+    conversation with Claude.  The build I did in Cursor and Claude Code, reaching
+    for Cursor first because I want to see every change as it lands.
+  </p>
+  <p>
+    It also writes me a morning brief. Every weekday at 7 AM a cron job reads today's
+    events from Google Calendar, unread mail from Gmail, and three Notion databases:
+    tasks, my networking tracker, and my job tracker.
+  </p>
+  <p>
+    The design decision I would defend in a review is what the model is <em>not</em>
+    allowed to do. It never chooses the priority. A fixed ladder written in Python ranks
+    the day (a high-priority task outranks a live job stage, which outranks an interview
+    on the calendar, and so on down to the first event of the morning). Only after Python
+    has picked the winner is the model handed that one item and asked to phrase it.
+    It also writes the prep notes and a short narrative paragraph, and it makes one
+    batched pass over unread mail to decide what is worth surfacing. Four narrow calls,
+    every one with a deterministic fallback, so a model that is down degrades the brief
+    instead of breaking it.
+  </p>
+  <p>
+    The model is <code>llama3.1:8b</code> running on my own hardware through Ollama. There
+    is no API bill, and nothing from my calendar or inbox leaves the network.
+  </p>
+
+  <div style="display: flex; flex-direction: column; gap: 16px; margin: 32px 0;">
+    <img src="screenshot-gtd-week.png" alt="GTD Weekly Organizer — week view" style="width: 100%; border-radius: 6px; border: 1px solid var(--border);">
+    <img src="screenshot-gtd-planning.png" alt="GTD Weekly Organizer — planning panel" style="width: 100%; border-radius: 6px; border: 1px solid var(--border);">
+  </div>
+
+
+  <h3 style="margin-top:40px;">How the Daily Brief Works</h3>
+  <figure style="margin:20px 0 8px;">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 940" style="width:100%;min-width:720px;height:auto;display:block" role="img" aria-labelledby="gttl gdsc">
+<title id="gttl">AI Weekly Organizer daily brief architecture</title>
+<desc id="gdsc">A weekday cron job runs one Python script that reads Google Calendar, Gmail, and three Notion databases. A narrow regex plus one batched local-model call filters the inbox. A fixed priority ladder written in Python then decides which single item matters most, with no model involved. Only after that is a locally hosted Llama 3.1 model asked to phrase the sentence, write prep notes, and draft a narrative paragraph, each with a deterministic fallback. The result is one JSON file the Next.js planner renders as a Daily Brief card. Everything runs on a self-hosted Linux server with no subscription and no data leaving the home network.</desc>
+<text x="30" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">MY DATA  ·  READ ONLY</text>
+<text x="330" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">GREEN DECIDES  ·  RED ONLY WRITES</text>
+<text x="778" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">TRIGGER  &amp;  APP DATA</text>
+<rect x="330" y="48" width="380" height="142" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="92" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">1 · Collect</text>
+<text x="520.0" y="109" text-anchor="middle" fill="#e3e3e3" font-size="11">data/daily_brief.py — one job, five reads</text>
+<rect x="30" y="48" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="65.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Google Calendar</text>
+<text x="146.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">today's events</text>
+<rect x="30" y="98" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="115.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Gmail</text>
+<text x="146.0" y="132.0" text-anchor="middle" fill="#e3e3e3" font-size="11">unread, primary inbox</text>
+<rect x="30" y="148" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="146.0" y="165.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Notion</text>
+<text x="146.0" y="182.0" text-anchor="middle" fill="#e3e3e3" font-size="11">Tasks · Network · Jobs</text>
+<line x1="262" y1="69" x2="321" y2="69" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="330,69 321,72.6 321,65.4" fill="#9aa0a6"/>
+<line x1="262" y1="119" x2="321" y2="119" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="330,119 321,122.6 321,115.4" fill="#9aa0a6"/>
+<line x1="262" y1="169" x2="321" y2="169" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="330,169 321,172.6 321,165.4" fill="#9aa0a6"/>
+<rect x="778" y="48" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="894.0" y="65.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Weekday cron</text>
+<text x="894.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">7:00 AM Eastern</text>
+<line x1="778" y1="69" x2="719" y2="69" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="710,69 719,72.6 719,65.4" fill="#9aa0a6"/>
+<line x1="520.0" y1="190" x2="520.0" y2="211" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,220 516.4,211 523.6,211" fill="#9aa0a6"/>
+<rect x="330" y="220" width="380" height="62" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="239.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">2 · Filter the inbox</text>
+<text x="520.0" y="256.0" text-anchor="middle" fill="#e3e3e3" font-size="11">narrow promo regex, then one batched model call</text>
+<text x="520.0" y="271.0" text-anchor="middle" fill="#e3e3e3" font-size="11">when it is unsure it keeps the mail</text>
+<rect x="622" y="228" width="76" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="660.0" y="240.5" text-anchor="middle" fill="#ffd9d2" font-size="9.5" font-weight="700" letter-spacing="0.4">MODEL</text>
+<line x1="520.0" y1="282" x2="520.0" y2="303" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,312 516.4,303 523.6,303" fill="#9aa0a6"/>
+<rect x="330" y="312" width="380" height="104" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
+<text x="520.0" y="344.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">3 · Decide what matters</text>
+<text x="520.0" y="361.0" text-anchor="middle" fill="#e3e3e3" font-size="11">a fixed priority ladder in Python, no model involved</text>
+<text x="520.0" y="376.0" text-anchor="middle" fill="#e3e3e3" font-size="11">HIGH task &gt; live job stage &gt; interview on the calendar</text>
+<text x="520.0" y="391.0" text-anchor="middle" fill="#e3e3e3" font-size="11">&gt; overdue task &gt; urgent email &gt; first event of the day</text>
+<rect x="604" y="320" width="94" height="17" rx="8.5" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1"/>
+<text x="651.0" y="332.5" text-anchor="middle" fill="#cdf2e6" font-size="9.5" font-weight="700" letter-spacing="0.4">PYTHON ONLY</text>
+<line x1="520.0" y1="416" x2="520.0" y2="437" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,446 516.4,437 523.6,437" fill="#9aa0a6"/>
+<rect x="330" y="446" width="380" height="62" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="465.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">4 · Write the words</text>
+<text x="520.0" y="482.0" text-anchor="middle" fill="#e3e3e3" font-size="11">the sentence, prep notes, the narrative paragraph</text>
+<text x="520.0" y="497.0" text-anchor="middle" fill="#e3e3e3" font-size="11">canned text if the model is unavailable</text>
+<rect x="622" y="454" width="76" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
+<text x="660.0" y="466.5" text-anchor="middle" fill="#ffd9d2" font-size="9.5" font-weight="700" letter-spacing="0.4">MODEL</text>
+<line x1="520.0" y1="508" x2="520.0" y2="529" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,538 516.4,529 523.6,529" fill="#9aa0a6"/>
+<rect x="330" y="538" width="380" height="52" rx="8" fill="#1e3a8a" stroke="#3355b5" stroke-width="1.5"/>
+<text x="520.0" y="560.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">5 · Publish</text>
+<text x="520.0" y="577.0" text-anchor="middle" fill="#e3e3e3" font-size="11">data/daily-brief.json — atomic replace, no history</text>
+<line x1="520.0" y1="590" x2="520.0" y2="611" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,620 516.4,611 523.6,611" fill="#9aa0a6"/>
+<rect x="330" y="620" width="380" height="52" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
+<text x="520.0" y="642.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Daily Brief card</text>
+<text x="520.0" y="659.0" text-anchor="middle" fill="#e3e3e3" font-size="11">Next.js planner reads GET /api/brief</text>
+<rect x="778" y="620" width="232" height="52" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
+<text x="894.0" y="642.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">SQLite · gtd.db</text>
+<text x="894.0" y="659.0" text-anchor="middle" fill="#e3e3e3" font-size="11">calendar, habits, goals</text>
+<line x1="778" y1="646" x2="719" y2="646" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="710,646 719,649.6 719,642.4" fill="#9aa0a6"/>
+<line x1="520.0" y1="672" x2="520.0" y2="693" stroke="#9aa0a6" stroke-width="1.6"/>
+<polygon points="520.0,702 516.4,693 523.6,693" fill="#9aa0a6"/>
+<rect x="330" y="702" width="380" height="38" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
+<text x="520.0" y="726.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">ME · read it with the first coffee</text>
+<text x="30" y="786" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">ALL OF THE ABOVE RUNS ON ONE LINUX BOX IN MY HOME OFFICE</text>
+<rect x="30" y="800" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
+<text x="193.0" y="823.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Ollama · llama3.1:8b</text>
+<text x="193.0" y="840.0" text-anchor="middle" fill="#e3e3e3" font-size="11">four narrow calls, my hardware, no API</text>
+<rect x="372" y="800" width="326" height="54" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
+<text x="535.0" y="823.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Ubuntu · PM2 · cron</text>
+<text x="535.0" y="840.0" text-anchor="middle" fill="#e3e3e3" font-size="11">restarts on reboot, no babysitting</text>
+<rect x="714" y="800" width="326" height="54" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
+<text x="877.0" y="823.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">No subscription</text>
+<text x="877.0" y="840.0" text-anchor="middle" fill="#e3e3e3" font-size="11">and no calendar or mail leaves the network</text>
+<text x="30" y="892" fill="#7c848d" font-size="11.5">The model never chooses the priority.  Python ranks the day from a fixed ladder, then the model is handed the winner and asked only to phrase it.</text>
+<text x="30" y="912" fill="#7c848d" font-size="11.5">Every model call has a deterministic fallback, so a dead model degrades the brief instead of breaking it.</text>
+</svg>
+    </div>
+    <figcaption style="color:var(--muted);font-size:13px;margin-top:10px;">
+      Green decides, red only writes. The priority ladder is plain Python; the model is handed
+      the winner and asked to phrase it.
+    </figcaption>
+  </figure>
+
+  <div class="tags">
+    <span class="tag">Next.js 16</span>
+    <span class="tag">TypeScript</span>
+    <span class="tag">React</span>
+    <span class="tag">Tailwind CSS</span>
+    <span class="tag">SQLite</span>
+    <span class="tag">Drizzle ORM</span>
+    <span class="tag">Python 3</span>
+    <span class="tag">Ollama · Llama 3.1</span>
+    <span class="tag">Google Calendar API</span>
+    <span class="tag">Gmail API</span>
+    <span class="tag">Notion API</span>
+    <span class="tag">PM2</span>
+    <span class="tag">cron</span>
+    <span class="tag">Ubuntu</span>
+    <span class="tag">Cursor</span>
+    <span class="tag">Claude Code</span>
+  </div>
+
+  <a href="https://github.com/darrowj/Getting-Things-Done-with-AI" target="_blank" class="github-link">View on GitHub →</a>
+
+  <div class="code-block"><span class="comment"># Run locally</span>
+<span class="cmd">$ npm run dev</span>
+<span class="ok">✓ Ready in 1305ms</span>
+<span class="accent">→ http://localhost:3000</span>
+
+<span class="comment"># Deploy to Linux server under PM2</span>
+<span class="cmd">$ rsync -av --exclude node_modules --exclude .next \
+    gtd-app/ darrowj@homelab:~/gtd-app/</span>
+<span class="cmd">$ ssh darrowj@homelab \
+    "cd ~/gtd-app && npm install && npm run build && pm2 start npm --name gtd -- start"</span>
+<span class="ok">✓ App running — accessible from any device on the network</span>
+<span class="accent">→ http://homelab:3000</span></div>
+
+  <!-- PROJECT 1 WAVE LOG -->
+  <div class="section-label" style="margin-top: 56px;" id="gtd-waves">Build Log — Getting Things Done with AI</div>
+  <div class="waves">
+    <div class="wave">
+      <div class="wave-num">1</div>
+      <div>
+        <div class="wave-title">Full Calendar UI + SQLite Persistence</div>
+        <p class="wave-desc">Week view and Day view with time grid (6 AM–10 PM), all-day band, recurring events (daily / weekly on chosen days), overlapping event layout, and per-category color coding.  Event modal with all-day toggle, repeat weekday chips, reminder settings, and "save this occurrence vs. save all" for recurring edits.  Planning panel with Weekly Summary, Daily Routine habit tracker, and SMART Goals — all scoped per week.  Light and Graphite theme toggle.  All data persists to SQLite via Next.js API routes and Drizzle ORM.</p>
+      </div>
+      <span class="badge badge-complete">Complete</span>
+    </div>
+    <div class="wave">
+      <div class="wave-num">2</div>
+      <div>
+        <div class="wave-title">Linux Deploy</div>
+        <p class="wave-desc">Synced to Ubuntu home server, running under PM2 with a startup hook.  Accessible from any device on the local network, live and in daily use.</p>
+      </div>
+      <span class="badge badge-complete">Complete</span>
+    </div>
+    <div class="wave">
+      <div class="wave-num">3</div>
+      <div>
+        <div class="wave-title">Daily Brief — Calendar, Gmail, Notion, Local LLM</div>
+        <p class="wave-desc">A Python job (<code>data/daily_brief.py</code>) reads today's events from Google Calendar, unread mail from Gmail, and the job and network trackers from Notion, all over OAuth and REST.  A deliberately narrow regex hard-drops obvious marketing, then one batched model call sorts the rest, biased to keep when it is unsure.  A fixed priority ladder in Python then picks the single most important item, with no model involved.  Only then is a locally hosted <code>llama3.1:8b</code> via Ollama asked to phrase that sentence, write prep notes, and draft a narrative paragraph.  Four narrow calls in total, each with a deterministic fallback.  Output is a single JSON file written by atomic replace and read by the planner at <code>GET /api/brief</code>.  Installed on a weekday 7:00 AM cron.  If the model is down the card says so, and the planner still works.</p>
+      </div>
+      <span class="badge badge-complete">Complete</span>
+    </div>
+    <div class="wave">
+      <div class="wave-num">4</div>
+      <div>
+        <div class="wave-title">Brief Filters</div>
+        <p class="wave-desc">Networking filter (intent detection plus a ±7 day follow-up window) and email noise filter (rule-based promo drop, then an Ollama keep/discard pass) are both live.  Job-posting filter polish is the current work.</p>
+      </div>
+      <span class="badge badge-active">In Progress</span>
+    </div>
+    <div class="wave">
+      <div class="wave-num">5</div>
+      <div>
+        <div class="wave-title">Calendar Sync + Reminders</div>
+        <p class="wave-desc">Pull live Google Calendar events into the planner grid itself, not just the brief.  Reminder delivery by push and email.  Editable routine items.</p>
+      </div>
+      <span class="badge badge-planned">Planned</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT DIVIDER -->
+<div class="project-divider"></div>
+
+<!-- PROJECT 2: AI Job Search -->
+<section id="projects">
+  <div class="section-label">Second Project</div>
+
+  <!-- AI Job Search -->
   <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 28px;">
     <h2 style="margin-bottom: 0;">AI Job Search System</h2>
     <span class="badge badge-complete">Complete</span>
@@ -736,7 +964,7 @@
     --description "..."</span>
 <span class="ok">✓ Cover letter saved: CoverLetter_Fidelity.docx</span></div>
 
-  <!-- PROJECT 1 WAVE LOG -->
+  <!-- PROJECT 2 WAVE LOG -->
   <div class="section-label" style="margin-top: 56px;" id="waves">Build Log — AI Job Search</div>
   <div class="waves">
     <div class="wave">
@@ -814,230 +1042,6 @@
   </div>
 </section>
 
-<!-- PROJECT DIVIDER -->
-<div class="project-divider"></div>
-
-<!-- PROJECT 2: AI-Assisted GTD -->
-<section id="gtd">
-  <div class="section-label">Second Project</div>
-  <h2>Getting Things Done with AI</h2>
-
-  <h3>What I Built</h3>
-  <p>
-    A full-stack personal weekly planner — built from scratch because nothing I tried
-    kept calendar, habits, and weekly goals in one place without a subscription.
-    This runs on a Linux box in my home office and is accessible from any device on the network.
-  </p>
-  <p>
-    The app is an Outlook-style weekly organizer with a full time grid, all-day events,
-    recurring events, and per-category color coding.  Below the calendar sit three weekly
-    planning cards: a free-text Weekly Summary, a Daily Routine habit tracker with
-    checkboxes across all seven days, and three SMART Goals scoped to the current week.
-    All data persists to a local SQLite database via a Next.js API layer.
-    Theme switches between Light and Graphite.  Built with Claude Code.
-  </p>
-  <p>
-    It also writes me a morning brief. Every weekday at 7 AM a cron job reads today's
-    events from Google Calendar, unread mail from Gmail, and three Notion databases:
-    tasks, my networking tracker, and my job tracker.
-  </p>
-  <p>
-    The design decision I would defend in a review is what the model is <em>not</em>
-    allowed to do. It never chooses the priority. A fixed ladder written in Python ranks
-    the day (a high-priority task outranks a live job stage, which outranks an interview
-    on the calendar, and so on down to the first event of the morning). Only after Python
-    has picked the winner is the model handed that one item and asked to phrase it.
-    It also writes the prep notes and a short narrative paragraph, and it makes one
-    batched pass over unread mail to decide what is worth surfacing. Four narrow calls,
-    every one with a deterministic fallback, so a model that is down degrades the brief
-    instead of breaking it.
-  </p>
-  <p>
-    The model is <code>llama3.1:8b</code> running on my own hardware through Ollama. There
-    is no API bill, and nothing from my calendar or inbox leaves the network.
-  </p>
-
-  <div style="display: flex; flex-direction: column; gap: 16px; margin: 32px 0;">
-    <img src="screenshot-gtd-week.png" alt="GTD Weekly Organizer — week view" style="width: 100%; border-radius: 6px; border: 1px solid var(--border);">
-    <img src="screenshot-gtd-planning.png" alt="GTD Weekly Organizer — planning panel" style="width: 100%; border-radius: 6px; border: 1px solid var(--border);">
-  </div>
-
-
-  <h3 style="margin-top:40px;">How the Daily Brief Works</h3>
-  <figure style="margin:20px 0 8px;">
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 940" style="width:100%;min-width:720px;height:auto;display:block" role="img" aria-labelledby="gttl gdsc">
-<title id="gttl">AI Weekly Organizer daily brief architecture</title>
-<desc id="gdsc">A weekday cron job runs one Python script that reads Google Calendar, Gmail, and three Notion databases. A narrow regex plus one batched local-model call filters the inbox. A fixed priority ladder written in Python then decides which single item matters most, with no model involved. Only after that is a locally hosted Llama 3.1 model asked to phrase the sentence, write prep notes, and draft a narrative paragraph, each with a deterministic fallback. The result is one JSON file the Next.js planner renders as a Daily Brief card. Everything runs on a self-hosted Linux server with no subscription and no data leaving the home network.</desc>
-<text x="30" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">MY DATA  ·  READ ONLY</text>
-<text x="330" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">GREEN DECIDES  ·  RED ONLY WRITES</text>
-<text x="778" y="32" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">TRIGGER  &amp;  APP DATA</text>
-<rect x="330" y="48" width="380" height="142" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
-<text x="520.0" y="92" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">1 · Collect</text>
-<text x="520.0" y="109" text-anchor="middle" fill="#e3e3e3" font-size="11">data/daily_brief.py — one job, five reads</text>
-<rect x="30" y="48" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
-<text x="146.0" y="65.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Google Calendar</text>
-<text x="146.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">today's events</text>
-<rect x="30" y="98" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
-<text x="146.0" y="115.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Gmail</text>
-<text x="146.0" y="132.0" text-anchor="middle" fill="#e3e3e3" font-size="11">unread, primary inbox</text>
-<rect x="30" y="148" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
-<text x="146.0" y="165.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Notion</text>
-<text x="146.0" y="182.0" text-anchor="middle" fill="#e3e3e3" font-size="11">Tasks · Network · Jobs</text>
-<line x1="262" y1="69" x2="321" y2="69" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="330,69 321,72.6 321,65.4" fill="#9aa0a6"/>
-<line x1="262" y1="119" x2="321" y2="119" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="330,119 321,122.6 321,115.4" fill="#9aa0a6"/>
-<line x1="262" y1="169" x2="321" y2="169" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="330,169 321,172.6 321,165.4" fill="#9aa0a6"/>
-<rect x="778" y="48" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
-<text x="894.0" y="65.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Weekday cron</text>
-<text x="894.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">7:00 AM Eastern</text>
-<line x1="778" y1="69" x2="719" y2="69" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="710,69 719,72.6 719,65.4" fill="#9aa0a6"/>
-<line x1="520.0" y1="190" x2="520.0" y2="211" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="520.0,220 516.4,211 523.6,211" fill="#9aa0a6"/>
-<rect x="330" y="220" width="380" height="62" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
-<text x="520.0" y="239.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">2 · Filter the inbox</text>
-<text x="520.0" y="256.0" text-anchor="middle" fill="#e3e3e3" font-size="11">narrow promo regex, then one batched model call</text>
-<text x="520.0" y="271.0" text-anchor="middle" fill="#e3e3e3" font-size="11">when it is unsure it keeps the mail</text>
-<rect x="622" y="228" width="76" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
-<text x="660.0" y="240.5" text-anchor="middle" fill="#ffd9d2" font-size="9.5" font-weight="700" letter-spacing="0.4">MODEL</text>
-<line x1="520.0" y1="282" x2="520.0" y2="303" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="520.0,312 516.4,303 523.6,303" fill="#9aa0a6"/>
-<rect x="330" y="312" width="380" height="104" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
-<text x="520.0" y="344.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">3 · Decide what matters</text>
-<text x="520.0" y="361.0" text-anchor="middle" fill="#e3e3e3" font-size="11">a fixed priority ladder in Python, no model involved</text>
-<text x="520.0" y="376.0" text-anchor="middle" fill="#e3e3e3" font-size="11">HIGH task &gt; live job stage &gt; interview on the calendar</text>
-<text x="520.0" y="391.0" text-anchor="middle" fill="#e3e3e3" font-size="11">&gt; overdue task &gt; urgent email &gt; first event of the day</text>
-<rect x="604" y="320" width="94" height="17" rx="8.5" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1"/>
-<text x="651.0" y="332.5" text-anchor="middle" fill="#cdf2e6" font-size="9.5" font-weight="700" letter-spacing="0.4">PYTHON ONLY</text>
-<line x1="520.0" y1="416" x2="520.0" y2="437" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="520.0,446 516.4,437 523.6,437" fill="#9aa0a6"/>
-<rect x="330" y="446" width="380" height="62" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
-<text x="520.0" y="465.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">4 · Write the words</text>
-<text x="520.0" y="482.0" text-anchor="middle" fill="#e3e3e3" font-size="11">the sentence, prep notes, the narrative paragraph</text>
-<text x="520.0" y="497.0" text-anchor="middle" fill="#e3e3e3" font-size="11">canned text if the model is unavailable</text>
-<rect x="622" y="454" width="76" height="17" rx="8.5" fill="#7a2318" stroke="#a3392a" stroke-width="1"/>
-<text x="660.0" y="466.5" text-anchor="middle" fill="#ffd9d2" font-size="9.5" font-weight="700" letter-spacing="0.4">MODEL</text>
-<line x1="520.0" y1="508" x2="520.0" y2="529" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="520.0,538 516.4,529 523.6,529" fill="#9aa0a6"/>
-<rect x="330" y="538" width="380" height="52" rx="8" fill="#1e3a8a" stroke="#3355b5" stroke-width="1.5"/>
-<text x="520.0" y="560.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">5 · Publish</text>
-<text x="520.0" y="577.0" text-anchor="middle" fill="#e3e3e3" font-size="11">data/daily-brief.json — atomic replace, no history</text>
-<line x1="520.0" y1="590" x2="520.0" y2="611" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="520.0,620 516.4,611 523.6,611" fill="#9aa0a6"/>
-<rect x="330" y="620" width="380" height="52" rx="8" fill="#4c3f91" stroke="#6b5cb8" stroke-width="1.5"/>
-<text x="520.0" y="642.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Daily Brief card</text>
-<text x="520.0" y="659.0" text-anchor="middle" fill="#e3e3e3" font-size="11">Next.js planner reads GET /api/brief</text>
-<rect x="778" y="620" width="232" height="52" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
-<text x="894.0" y="642.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">SQLite · gtd.db</text>
-<text x="894.0" y="659.0" text-anchor="middle" fill="#e3e3e3" font-size="11">calendar, habits, goals</text>
-<line x1="778" y1="646" x2="719" y2="646" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="710,646 719,649.6 719,642.4" fill="#9aa0a6"/>
-<line x1="520.0" y1="672" x2="520.0" y2="693" stroke="#9aa0a6" stroke-width="1.6"/>
-<polygon points="520.0,702 516.4,693 523.6,693" fill="#9aa0a6"/>
-<rect x="330" y="702" width="380" height="38" rx="8" fill="#8a5a00" stroke="#b87b0a" stroke-width="1.5"/>
-<text x="520.0" y="726.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">ME · read it with the first coffee</text>
-<text x="30" y="786" fill="#7c848d" font-size="10.5" font-weight="700" letter-spacing="1.5">ALL OF THE ABOVE RUNS ON ONE LINUX BOX IN MY HOME OFFICE</text>
-<rect x="30" y="800" width="326" height="54" rx="8" fill="#7a2318" stroke="#a3392a" stroke-width="1.5"/>
-<text x="193.0" y="823.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Ollama · llama3.1:8b</text>
-<text x="193.0" y="840.0" text-anchor="middle" fill="#e3e3e3" font-size="11">four narrow calls, my hardware, no API</text>
-<rect x="372" y="800" width="326" height="54" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
-<text x="535.0" y="823.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Ubuntu · PM2 · cron</text>
-<text x="535.0" y="840.0" text-anchor="middle" fill="#e3e3e3" font-size="11">restarts on reboot, no babysitting</text>
-<rect x="714" y="800" width="326" height="54" rx="8" fill="#1a6b5a" stroke="#2a8b76" stroke-width="1.5"/>
-<text x="877.0" y="823.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">No subscription</text>
-<text x="877.0" y="840.0" text-anchor="middle" fill="#e3e3e3" font-size="11">and no calendar or mail leaves the network</text>
-<text x="30" y="892" fill="#7c848d" font-size="11.5">The model never chooses the priority.  Python ranks the day from a fixed ladder, then the model is handed the winner and asked only to phrase it.</text>
-<text x="30" y="912" fill="#7c848d" font-size="11.5">Every model call has a deterministic fallback, so a dead model degrades the brief instead of breaking it.</text>
-</svg>
-    </div>
-    <figcaption style="color:var(--muted);font-size:13px;margin-top:10px;">
-      Green decides, red only writes. The priority ladder is plain Python; the model is handed
-      the winner and asked to phrase it.
-    </figcaption>
-  </figure>
-
-  <div class="tags">
-    <span class="tag">Next.js 16</span>
-    <span class="tag">TypeScript</span>
-    <span class="tag">React</span>
-    <span class="tag">Tailwind CSS</span>
-    <span class="tag">SQLite</span>
-    <span class="tag">Drizzle ORM</span>
-    <span class="tag">Python 3</span>
-    <span class="tag">Ollama · Llama 3.1</span>
-    <span class="tag">Google Calendar API</span>
-    <span class="tag">Gmail API</span>
-    <span class="tag">Notion API</span>
-    <span class="tag">PM2</span>
-    <span class="tag">cron</span>
-    <span class="tag">Ubuntu</span>
-    <span class="tag">Claude Code</span>
-  </div>
-
-  <a href="https://github.com/darrowj/Getting-Things-Done-with-AI" target="_blank" class="github-link">View on GitHub →</a>
-
-  <div class="code-block"><span class="comment"># Run locally</span>
-<span class="cmd">$ npm run dev</span>
-<span class="ok">✓ Ready in 1305ms</span>
-<span class="accent">→ http://localhost:3000</span>
-
-<span class="comment"># Deploy to Linux server under PM2</span>
-<span class="cmd">$ rsync -av --exclude node_modules --exclude .next \
-    gtd-app/ darrowj@homelab:~/gtd-app/</span>
-<span class="cmd">$ ssh darrowj@homelab \
-    "cd ~/gtd-app && npm install && npm run build && pm2 start npm --name gtd -- start"</span>
-<span class="ok">✓ App running — accessible from any device on the network</span>
-<span class="accent">→ http://homelab:3000</span></div>
-
-  <!-- PROJECT 2 WAVE LOG -->
-  <div class="section-label" style="margin-top: 56px;" id="gtd-waves">Build Log — Getting Things Done with AI</div>
-  <div class="waves">
-    <div class="wave">
-      <div class="wave-num">1</div>
-      <div>
-        <div class="wave-title">Full Calendar UI + SQLite Persistence</div>
-        <p class="wave-desc">Week view and Day view with time grid (6 AM–10 PM), all-day band, recurring events (daily / weekly on chosen days), overlapping event layout, and per-category color coding.  Event modal with all-day toggle, repeat weekday chips, reminder settings, and "save this occurrence vs. save all" for recurring edits.  Planning panel with Weekly Summary, Daily Routine habit tracker, and SMART Goals — all scoped per week.  Light and Graphite theme toggle.  All data persists to SQLite via Next.js API routes and Drizzle ORM.</p>
-      </div>
-      <span class="badge badge-complete">Complete</span>
-    </div>
-    <div class="wave">
-      <div class="wave-num">2</div>
-      <div>
-        <div class="wave-title">Linux Deploy</div>
-        <p class="wave-desc">Synced to Ubuntu home server, running under PM2 with a startup hook.  Accessible from any device on the local network, live and in daily use.</p>
-      </div>
-      <span class="badge badge-complete">Complete</span>
-    </div>
-    <div class="wave">
-      <div class="wave-num">3</div>
-      <div>
-        <div class="wave-title">Daily Brief — Calendar, Gmail, Notion, Local LLM</div>
-        <p class="wave-desc">A Python job (<code>data/daily_brief.py</code>) reads today's events from Google Calendar, unread mail from Gmail, and the job and network trackers from Notion, all over OAuth and REST.  A deliberately narrow regex hard-drops obvious marketing, then one batched model call sorts the rest, biased to keep when it is unsure.  A fixed priority ladder in Python then picks the single most important item, with no model involved.  Only then is a locally hosted <code>llama3.1:8b</code> via Ollama asked to phrase that sentence, write prep notes, and draft a narrative paragraph.  Four narrow calls in total, each with a deterministic fallback.  Output is a single JSON file written by atomic replace and read by the planner at <code>GET /api/brief</code>.  Installed on a weekday 7:00 AM cron.  If the model is down the card says so, and the planner still works.</p>
-      </div>
-      <span class="badge badge-complete">Complete</span>
-    </div>
-    <div class="wave">
-      <div class="wave-num">4</div>
-      <div>
-        <div class="wave-title">Brief Filters</div>
-        <p class="wave-desc">Networking filter (intent detection plus a ±7 day follow-up window) and email noise filter (rule-based promo drop, then an Ollama keep/discard pass) are both live.  Job-posting filter polish is the current work.</p>
-      </div>
-      <span class="badge badge-active">In Progress</span>
-    </div>
-    <div class="wave">
-      <div class="wave-num">5</div>
-      <div>
-        <div class="wave-title">Calendar Sync + Reminders</div>
-        <p class="wave-desc">Pull live Google Calendar events into the planner grid itself, not just the brief.  Reminder delivery by push and email.  Editable routine items.</p>
-      </div>
-      <span class="badge badge-planned">Planned</span>
-    </div>
-  </div>
-</section>
-
 <!-- ABOUT -->
 <section id="about">
   <div class="section-label">Background</div>
@@ -1061,9 +1065,8 @@
     documents all of them.
   </p>
   <p>
-    I'm learning AI by doing, not watching. Every week something new
-    gets built, committed to GitHub, and shipped.
-    The results have been genuinely surprising.
+    I'm learning AI by doing, not watching. Every week something gets
+    shipped or written up here. The results have been genuinely surprising.
   </p>
 
   <div class="credentials">

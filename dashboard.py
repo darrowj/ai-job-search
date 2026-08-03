@@ -656,9 +656,62 @@ with tab4:
                 data = {}
 
             st.markdown(f"### Tailored output — **{company}**")
-            score = data.get("match_score")
-            if score is not None:
-                st.metric("Match score", f"{score} / 100")
+
+            # Coverage is computed in code from the posting's own requirements.
+            # match_score was the model grading its own selection, which is how
+            # a resume missing two of four stated requirements scored an 82.
+            coverage_score = data.get("coverage_score")
+            model_score = data.get("model_match_score", data.get("match_score"))
+            c1, c2 = st.columns(2)
+            with c1:
+                if coverage_score is not None:
+                    st.metric("Requirements coverage", f"{coverage_score} / 100")
+                else:
+                    st.metric("Requirements coverage", "—",
+                              help="Re-run the tailor to compute coverage.")
+            with c2:
+                if model_score is not None:
+                    st.metric("Model self-score", f"{model_score} / 100",
+                              help="The model's own opinion. Trust the coverage number.")
+
+            coverage = data.get("coverage") or []
+            if coverage:
+                gaps = [c for c in coverage if c.get("verdict") != "COVERED"]
+                blocking = [c for c in gaps if c.get("must_have")]
+                if blocking:
+                    st.error(
+                        f"{len(blocking)} REQUIRED item(s) not covered — this is what "
+                        f"screens you out before a human reads anything."
+                    )
+                else:
+                    st.success("Every required item on this posting is covered.")
+
+                with st.expander(f"Requirements coverage ({len(coverage)} items)",
+                                 expanded=bool(blocking)):
+                    for c in coverage:
+                        icon = {"COVERED": "✅", "WEAK": "🟡", "MISSING": "❌"}.get(
+                            c.get("verdict"), "•")
+                        req = "**REQUIRED**" if c.get("must_have") else "preferred"
+                        st.markdown(f"{icon} {req} — {c.get('requirement','')}")
+                        if c.get("verdict") == "WEAK":
+                            st.caption(
+                                "In your master file but not on the page: "
+                                + ", ".join(c.get("available_in_master", [])[:6])
+                                + "  ← fixable, surface it"
+                            )
+                        elif c.get("verdict") == "MISSING":
+                            st.caption(
+                                "No evidence anywhere for: "
+                                + ", ".join(c.get("unmatched_terms", [])[:6])
+                                + "  ← cover letter, or apply knowing the gap"
+                            )
+
+            comps = data.get("tailored_competencies") or []
+            if comps:
+                st.write("**Core Competencies band:** " + " | ".join(comps))
+            tech = data.get("technical_skills") or []
+            if tech:
+                st.write("**Technical line:** " + " | ".join(tech))
             key_skills = data.get("key_skills") or []
             if key_skills:
                 st.write("**Key skills selected:** " + ", ".join(key_skills))
