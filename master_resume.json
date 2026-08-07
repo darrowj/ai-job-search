@@ -61,7 +61,9 @@
     "Process Improvement",
     "Regulatory & Audit Support",
     "AI & Automation in Delivery",
-    "Release & Deployment Management"
+    "Release & Deployment Management",
+    "SaaS & Vendor Governance",
+    "Team Leadership & Mentoring"
   ],
   "key_contributions": [
     "IT Lead for a business project overseeing 30 application teams with a $2M+ budget",
@@ -460,6 +462,19 @@
             "b017"
           ],
           "note": "b017 said 'Worked as a QA Lead', which understated the role.  Jason oversaw QA leads and ran QA at the program level."
+        },
+        {
+          "id": "b064",
+          "text": "Coached and mentored delivery managers, project managers, business analysts, and QA testers on active projects, adjusting the level of support to each person's experience.",
+          "tags": [
+            "mentoring",
+            "coaching",
+            "people-development",
+            "leadership",
+            "informal-leadership"
+          ],
+          "strength": 8,
+          "note": "Informal, as-needed coaching across roles, not line management.  Answers postings that ask for mentoring or informally supporting other project managers.  Distinct from b056, which is formal supervision with hiring authority at BoA."
         }
       ]
     },
@@ -779,7 +794,7 @@
           "strength": 8
         },
         {
-          "id": "b060",
+          "id": "b063",
           "text": "Built SOAP web services to WSDL and XSD contracts, connecting leasing applications to backend data systems.",
           "tags": [
             "web-services",
@@ -799,6 +814,19 @@
       "dates": "February 2000 \u2013 January 2001",
       "role_description": "Acted as senior developer for Custom Services Group providing eLearning software development services for Fortune 1000 companies.",
       "bullets": [
+        {
+          "id": "b062",
+          "text": "Delivered eLearning software projects for Fortune 1000 clients in a client-facing role, presenting completed work directly to client teams at Microsoft and Data Dimension International.",
+          "tags": [
+            "client-facing",
+            "client-presentation",
+            "eLearning",
+            "Fortune1000",
+            "delivery"
+          ],
+          "strength": 9,
+          "note": "Merges b041/b044 with the role_description's eLearning framing.  The only external client-facing evidence in the master file, and the only eLearning-industry evidence.  Off the resume by default (2000-2001 date); switched on per-application with --early-experience."
+        },
         {
           "id": "b041",
           "text": "Completed projects with Microsoft, Prudential, Fidelity, Princeton Review and Data Dimension International.",
@@ -1020,5 +1048,21 @@
       "Service Delivery Manager"
     ],
     "bullet_count": 62
+  },
+  "headline": {
+    "title": "IT Leader",
+    "tagline": [
+      "Program & Project Delivery",
+      "Vendor & Portfolio Management",
+      "IT Governance"
+    ],
+    "title_pool": [
+      "IT Leader",
+      "Delivery Leader",
+      "IT Delivery Manager",
+      "Program Manager",
+      "Technology Delivery Leader"
+    ],
+    "note": "Static on every resume generated before 8/4 -- same three terms to every employer, and all three duplicated the Core Competencies band.  Now selected per posting.  title_pool is the honesty boundary for the role label; tagline terms must come from competency_pool."
   }
 }

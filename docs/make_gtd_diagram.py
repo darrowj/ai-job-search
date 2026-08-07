@@ -99,7 +99,7 @@ box(LX, 148, LW, 42, SOURCE, "Notion", "Tasks · Network · Jobs")
 for y in (69, 119, 169):
     right(y, LX + LW, CX)
 
-box(RX, 48, RW, 42, SOURCE, "Weekday cron", "7:00 AM Eastern")
+box(RX, 48, RW, 42, SOURCE, "Weekday cron", "6:00 AM Eastern")
 left(69, RX, CX + CW)
 
 # ---- 2 Filter

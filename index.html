@@ -550,7 +550,7 @@
     for Cursor first because I want to see every change as it lands.
   </p>
   <p>
-    It also writes me a morning brief. Every weekday at 7 AM a cron job reads today's
+    It also writes me a morning brief. Every weekday at 6 AM a cron job reads today's
     events from Google Calendar, unread mail from Gmail, and three Notion databases:
     tasks, my networking tracker, and my job tracker.
   </p>
@@ -605,7 +605,7 @@
 <polygon points="330,169 321,172.6 321,165.4" fill="#9aa0a6"/>
 <rect x="778" y="48" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
 <text x="894.0" y="65.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Weekday cron</text>
-<text x="894.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">7:00 AM Eastern</text>
+<text x="894.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">6:00 AM Eastern</text>
 <line x1="778" y1="69" x2="719" y2="69" stroke="#9aa0a6" stroke-width="1.6"/>
 <polygon points="710,69 719,72.6 719,65.4" fill="#9aa0a6"/>
 <line x1="520.0" y1="190" x2="520.0" y2="211" stroke="#9aa0a6" stroke-width="1.6"/>
@@ -729,7 +729,7 @@
       <div class="wave-num">3</div>
       <div>
         <div class="wave-title">Daily Brief — Calendar, Gmail, Notion, Local LLM</div>
-        <p class="wave-desc">A Python job (<code>data/daily_brief.py</code>) reads today's events from Google Calendar, unread mail from Gmail, and the job and network trackers from Notion, all over OAuth and REST.  A deliberately narrow regex hard-drops obvious marketing, then one batched model call sorts the rest, biased to keep when it is unsure.  A fixed priority ladder in Python then picks the single most important item, with no model involved.  Only then is a locally hosted <code>llama3.1:8b</code> via Ollama asked to phrase that sentence, write prep notes, and draft a narrative paragraph.  Four narrow calls in total, each with a deterministic fallback.  Output is a single JSON file written by atomic replace and read by the planner at <code>GET /api/brief</code>.  Installed on a weekday 7:00 AM cron.  If the model is down the card says so, and the planner still works.</p>
+        <p class="wave-desc">A Python job (<code>data/daily_brief.py</code>) reads today's events from Google Calendar, unread mail from Gmail, and the job and network trackers from Notion, all over OAuth and REST.  A deliberately narrow regex hard-drops obvious marketing, then one batched model call sorts the rest, biased to keep when it is unsure.  A fixed priority ladder in Python then picks the single most important item, with no model involved.  Only then is a locally hosted <code>llama3.1:8b</code> via Ollama asked to phrase that sentence, write prep notes, and draft a narrative paragraph.  Four narrow calls in total, each with a deterministic fallback.  Output is a single JSON file written by atomic replace and read by the planner at <code>GET /api/brief</code>.  Installed on a weekday 6:00 AM cron.  If the model is down the card says so, and the planner still works.</p>
       </div>
       <span class="badge badge-complete">Complete</span>
     </div>

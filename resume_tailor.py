@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 import voice
+import band
 
 # Load API keys from .env
 load_dotenv()
@@ -260,11 +261,29 @@ description.  Your job is to:
 5. Select 9 to 12 entries from COMPETENCY POOL below for the Core Competencies
    band, ordered by relevance to this posting.  Copy them EXACTLY as written.
    Do not invent a competency that is not in the pool.
-6. Select the technical terms from SKILL POOL below that this posting actually
-   asks about, most relevant first.  Copy them EXACTLY.  Do not add a skill
-   that is not in the pool, however well it would match -- a skill Jason cannot
-   defend in an interview is worse than a missing keyword.
-7. Return the JSON described at the bottom.
+6. Select 6 to 10 terms from SKILL POOL below that this posting actually asks
+   about, most relevant first.  Copy them EXACTLY.  Do not add a skill that is
+   not in the pool, however well it would match -- a skill Jason cannot defend
+   in an interview is worse than a missing keyword.  Two more rules:
+   - Do NOT repeat anything you already put in tailored_competencies, or say
+     the same thing in different words.  If the band says "Agile & Waterfall
+     Delivery", do not also list Agile and Waterfall.  This row exists to add
+     the concrete terms the competencies cannot carry (tools, languages,
+     platforms, domains), not to restate them.
+   - Do not dump the whole pool.  Terms the posting never asks about dilute the
+     ones it does.
+7. Pick the headline.  "tailored_headline" is the role label under Jason's
+   name and must come from HEADLINE TITLE POOL below, verbatim.  Choose the
+   one that matches how THIS employer describes the job.  A software vendor
+   hiring someone to deliver to its own customers should not be reading
+   "IT Leader", which positions him as internal IT.
+8. Pick 3 terms from COMPETENCY POOL for "tailored_tagline", the line directly
+   under the headline.  At most ONE of them may also appear in
+   tailored_competencies.  The tagline is read in the first two seconds and
+   the band is read second, so repeating the single core term is emphasis but
+   repeating all three wastes the best space on the page.  Pick terms that say
+   something the band does not.
+9. Return the JSON described at the bottom.
 
 LENGTH BUDGET (this resume must fit on two pages):
 - tailored_summary: 650 characters maximum
@@ -273,6 +292,9 @@ LENGTH BUDGET (this resume must fit on two pages):
 {_requirements_block(requirements)}
 
 {voice.voice_rules(resume_mode=True)}
+
+HEADLINE TITLE POOL (select exactly 1, verbatim):
+{json.dumps((master_resume.get("headline") or {}).get("title_pool", []), indent=2)}
 
 COMPETENCY POOL (select 9-12, verbatim):
 {json.dumps(master_resume.get("competency_pool") or master_resume.get("core_competencies", []), indent=2)}
@@ -298,6 +320,8 @@ Return your response in this exact JSON format:
       "bullet": "the tailored bullet text"
     }}
   ],
+  "tailored_headline": "one entry from HEADLINE TITLE POOL",
+  "tailored_tagline": ["term 1", "term 2", "term 3"],
   "tailored_competencies": ["competency 1", "competency 2"],
   "technical_skills": ["skill 1", "skill 2"],
   "key_skills": ["skill1", "skill2", "skill3"],
@@ -472,12 +496,57 @@ def validate_selection(result):
     if kept and not (9 <= len(kept) <= 12):
         warnings.append(f"{len(kept)} competencies selected (expected 9-12).")
 
+    # The headline and its tagline sit above everything else on the page and
+    # were static until 8/4.  Same honesty boundary as the band: the role label
+    # comes from title_pool, the tagline terms from competency_pool.
+    head_cfg = master_resume.get("headline") or {}
+    title_pool = head_cfg.get("title_pool") or []
+    if title_pool:
+        chosen, rejected = _filter_to_pool([result.get("tailored_headline")], title_pool)
+        result["tailored_headline"] = chosen[0] if chosen else head_cfg.get("title")
+        if rejected:
+            warnings.append(
+                f"Headline '{rejected[0]}' is not in the title pool — fell back to "
+                f"'{result['tailored_headline']}'."
+            )
+
+    tagline, rejected = _filter_to_pool(result.get("tailored_tagline", []), pool)
+    if rejected:
+        warnings.append(f"Dropped {len(rejected)} tagline term(s) not in the pool: "
+                        f"{', '.join(rejected)}")
+    if tagline:
+        result["tailored_tagline"] = tagline[:3]
+        echoed = band.dedupe_skills(result["tailored_tagline"],
+                                    result["tailored_competencies"])[1]
+        if len(echoed) > 1:
+            warnings.append(
+                f"{len(echoed)} of {len(result['tailored_tagline'])} tagline terms "
+                f"repeat the competency band ({', '.join(echoed)}).  One repeat is "
+                f"emphasis, more is wasted space at the top of the page."
+            )
+
     skills_pool = _skill_pool(master_resume)
     kept, dropped = _filter_to_pool(result.get("technical_skills", []), skills_pool)
-    result["technical_skills"] = kept
     if dropped:
         warnings.append(
             f"Dropped {len(dropped)} skill(s) Jason cannot claim: {', '.join(dropped)}"
+        )
+
+    # The skills row sits directly under the competency band, so anything it
+    # repeats is visible duplication in the densest keyword block on the page.
+    # Prompted-only enforcement did not hold: the Attensi run returned all 22
+    # pool terms, ten of which restated a competency printed two lines above.
+    kept, duped = band.dedupe_skills(kept, result.get("tailored_competencies", []))
+    if duped:
+        warnings.append(
+            f"Dropped {len(duped)} skill(s) already in the competency band: "
+            f"{', '.join(duped)}"
+        )
+    result["technical_skills"] = kept
+    if len(kept) > band.MAX_SKILL_TERMS:
+        warnings.append(
+            f"{len(kept)} skill terms selected (expected {band.MAX_SKILL_TERMS} or "
+            f"fewer).  Trim the ones this posting never asks about."
         )
 
     if warnings:

@@ -24,7 +24,7 @@
 <polygon points="330,169 321,172.6 321,165.4" fill="#9aa0a6"/>
 <rect x="778" y="48" width="232" height="42" rx="8" fill="#4a4a4a" stroke="#6b6b6b" stroke-width="1.5"/>
 <text x="894.0" y="65.0" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="600">Weekday cron</text>
-<text x="894.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">7:00 AM Eastern</text>
+<text x="894.0" y="82.0" text-anchor="middle" fill="#e3e3e3" font-size="11">6:00 AM Eastern</text>
 <line x1="778" y1="69" x2="719" y2="69" stroke="#9aa0a6" stroke-width="1.6"/>
 <polygon points="710,69 719,72.6 719,65.4" fill="#9aa0a6"/>
 <line x1="520.0" y1="190" x2="520.0" y2="211" stroke="#9aa0a6" stroke-width="1.6"/>
